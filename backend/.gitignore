@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / Secrets
+.env
+.env.*
+!.env.example
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Testing / Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Build / Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+*.whl
+
+# RAG Data
+
+# Uploaded/source documents
+data/
+documents/
+uploads/
+
+# Vector databases / indexes
+chroma/
+chroma_db/
+vectorstore/
+vector_store/
+.faiss/
+*.faiss
+*.index
+
+# Logs
+*.log
+logs/
+
+# Model / Cache Files
+.cache/
+huggingface_cache/
+transformers_cache/
+*.bin
+*.safetensors
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
