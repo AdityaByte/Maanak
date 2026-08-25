@@ -15,3 +15,6 @@ dependencies = [
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+where = ["."]
+include = ["app*"]
+exclude = ["notebook*", "tests*"]
