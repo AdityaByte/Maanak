@@ -45,7 +45,7 @@ def test_load_missing_page_content(mock_file):
     file = mock_file(data)
     loader = JSONDocumentLoader(str(file))
 
-    with pytest.raises(ValueError, match="missing 'page_conent' key"):
+    with pytest.raises(ValueError, match="missing 'page_content' key"):
         loader.load()
 
 def test_load_skips_empty_lines(mock_file):
