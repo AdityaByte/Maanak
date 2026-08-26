@@ -1,9 +1,15 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type { ComponentType } from "react";
 
 type NavItem = {
   label: string;
   href: string;
-  icon: React.ReactNode;
+  icon: ComponentType;
+  /** Set to true once the real route/page exists. */
+  enabled?: boolean;
 };
 
 const iconProps = {
@@ -88,33 +94,66 @@ const UploadIcon = () => (
   </svg>
 );
 
-// Only "/" exists today. Every other item is kept disabled until its
-// real route is built — no routes are invented here.
+// Only "/" is a real, built route today. Everything else is rendered
+// disabled until its page actually exists — flip `enabled: true` when
+// the route ships instead of pointing at a link that 404s.
 const mainNavItems: NavItem[] = [
-  { label: "Dashboard", href: "/", icon: <DashboardIcon /> },
-  { label: "Standards Search", href: "/standards-search", icon: <SearchIcon />, },
-  { label: "AI Assistant", href: "/ai-assistant", icon: <AssistantIcon />, },
-  { label: "Standards Explorer", href: "/standards-explorer", icon: <CompassIcon />, },
-  { label: "Old Standards", href: "/old-standards", icon: <HistoryIcon />, },
-  { label: "Saved Standards", href: "/saved-standards", icon: <BookmarkIcon />, },
-  { label: "Recent Activity", href: "/recent-activity", icon: <ActivityIcon />, },
+  { label: "Dashboard", href: "/", icon: DashboardIcon, enabled: true },
+  { label: "Standards Search", href: "/standards-search", icon: SearchIcon },
+  { label: "AI Assistant", href: "/ai-assistant", icon: AssistantIcon },
+  { label: "Standards Explorer", href: "/standards-explorer", icon: CompassIcon },
+  { label: "Old Standards", href: "/old-standards", icon: HistoryIcon },
+  { label: "Saved Standards", href: "/saved-standards", icon: BookmarkIcon },
+  { label: "Recent Activity", href: "/recent-activity", icon: ActivityIcon },
 ];
 
 const footerNavItems: NavItem[] = [
-  { label: "Settings", href: "/settings", icon: <SettingsIcon />, },
-  { label: "Help", href: "/help", icon: <HelpIcon />, },
+  { label: "Settings", href: "/settings", icon: SettingsIcon },
+  { label: "Help", href: "/help", icon: HelpIcon },
 ];
 
-function NavRow({ item, onNavigate }: { item: NavItem; onNavigate?: () => void }) {
-  const baseClasses = "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors";
- 
+function NavRow({
+  item,
+  isActive,
+  onNavigate,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  onNavigate?: () => void;
+}) {
+  const Icon = item.icon;
+  const baseClasses =
+    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50";
+
+  if (!item.enabled) {
+    return (
+      <span
+        aria-disabled="true"
+        title="Coming soon"
+        className={`${baseClasses} cursor-not-allowed text-muted-foreground/50`}
+      >
+        <span className="shrink-0">
+          <Icon />
+        </span>
+        <span className="truncate">{item.label}</span>
+      </span>
+    );
+  }
+
   return (
     <Link
       href={item.href}
       onClick={onNavigate}
-      className={`${baseClasses} bg-primary/10 font-medium text-primary`}
+      aria-current={isActive ? "page" : undefined}
+      className={`${baseClasses} ${
+        isActive
+          ? "bg-primary/10 font-medium text-primary"
+          : "text-foreground/80 hover:bg-muted hover:text-foreground"
+      }`}
     >
-      <span className="shrink-0">{item.icon}</span>
+      <span className="shrink-0">
+        <Icon />
+      </span>
       <span className="truncate">{item.label}</span>
     </Link>
   );
@@ -126,6 +165,8 @@ type SidebarProps = {
 };
 
 export default function Sidebar({ onNavigate }: SidebarProps) {
+  const pathname = usePathname();
+
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-card">
       {/* Brand header */}
@@ -145,7 +186,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
       <div className="px-5 pb-5">
         <button
           type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
         >
           <UploadIcon />
           Upload Document
@@ -157,7 +198,11 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
         <ul className="flex flex-col gap-1">
           {mainNavItems.map((item) => (
             <li key={item.label}>
-              <NavRow item={item} onNavigate={onNavigate} />
+              <NavRow
+                item={item}
+                isActive={pathname === item.href}
+                onNavigate={onNavigate}
+              />
             </li>
           ))}
         </ul>
@@ -168,7 +213,11 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
         <ul className="flex flex-col gap-1">
           {footerNavItems.map((item) => (
             <li key={item.label}>
-              <NavRow item={item} onNavigate={onNavigate} />
+              <NavRow
+                item={item}
+                isActive={pathname === item.href}
+                onNavigate={onNavigate}
+              />
             </li>
           ))}
         </ul>
