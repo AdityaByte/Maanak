@@ -10,6 +10,7 @@ dependencies = [
     "langchain-community>=0.4.2",
     "langchain-core>=1.6.0",
     "pytest>=9.1.1",
+    "qdrant-client>=1.19.0",
     "uvicorn>=0.52.4",
 ]
 

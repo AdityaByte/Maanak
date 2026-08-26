@@ -30,7 +30,7 @@ class JSONDocumentLoader:
                     raise ValueError(f"Invalid JSON document found on line {line_num} of {self._path}: {e}") from e
 
                 if "page_content" not in record:
-                    raise ValueError(f"Line {line_num} missing 'page_conent' key")
+                    raise ValueError(f"Line {line_num} missing 'page_content' key")
 
                 documents.append(Document(
                     page_content=record["page_content"],
