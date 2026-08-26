@@ -19,12 +19,11 @@ class QdrantVectorStore:
             self,
             collection_name: str,
             dense_dim: int,
+            client: QdrantClient,
             embed_fn: Callable[[str], list[float]],
-            url: str = "http://localhost:6333",
-            api_key: str | None = None,
             sparse_embed_fn: Callable[[str], tuple[list[int], list[float]]] | None = None
     ):
-        self.client = QdrantClient(url=url, api_key=api_key)
+        self.client = client
         self.collection_name = collection_name
         self.dense_dim = dense_dim
         self.embed_fn = embed_fn
@@ -135,6 +134,31 @@ class QdrantVectorStore:
             logger.info(f"Batch of {len(batch)} has been successfully upserted.")
 
         return {"upserted": len(points)}
+
+
+    def get_categories(self) -> list[str]:
+        categories = set()
+        offset = None
+
+        while True:
+            points, offset = self.client.scroll(
+                collection_name=self.collection_name,
+                offset=offset,
+                limit=100,
+                with_payload=True,
+                with_vectors=False
+            )
+
+            for point in points:
+                category = point.payload.get("category")
+
+                if category:
+                    categories.add(category)
+
+            if offset is None:
+                break
+
+        return sorted(categories)
 
 
     # Helper method
