@@ -1,23 +1,51 @@
+// app/layout.tsx
+import type { Metadata } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Sidebar from "./components/Sidebar";
 import Drawer from "./components/Drawer";
+import TopNavbar from "./components/TopNavbar";
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "Maanak - AI Powered BIS Recommendation Engine",
+  description: "Smarter Search. Accurate Standards. Better Decisions.",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
-      <body className="flex h-screen flex-col overflow-hidden md:flex-row">
-        {/* Desktop sidebar */}
-        <div className="hidden h-full w-[272px] shrink-0 md:flex md:border-r md:border-border">
+    <html lang="en" className={`h-full ${plusJakartaSans.variable}`}>
+      <body
+        className={`${plusJakartaSans.className} flex h-screen overflow-hidden bg-slate-50 text-slate-900 antialiased`}
+      >
+        {/* Fixed Desktop Sidebar */}
+        <aside className="hidden h-full w-[260px] shrink-0 border-r border-slate-200/60 bg-white md:flex">
           <Sidebar />
-        </div>
+        </aside>
 
-        {/* Mobile drawer */}
+        {/* Mobile Drawer */}
         <Drawer />
 
-        {/* Main content */}
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-          {children}
-        </main>
+        {/* Main Content Viewport — the ONLY scrolling container */}
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+            {/* Sticky Header — sticks to top of THIS scroll container */}
+            <TopNavbar />
+
+            {/* Scrollable Page Body */}
+            <div className="px-8 pb-12">{children}</div>
+          </main>
+        </div>
       </body>
     </html>
   );
