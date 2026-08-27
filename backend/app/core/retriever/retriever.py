@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Optional, Callable, Tuple
+from typing import Callable
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Filter,
