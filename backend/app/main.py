@@ -23,6 +23,7 @@ from app.core.retriever.query_router import QueryRouter
 from app.core.context_builder import ContextBuilder
 from app.core.prompt_builder import PromptBuilder
 from app.core.llm.groq_llm_client import GroqLLMClient
+from app.schema.rag_response_schema import RAGResponse
 
 logger = logging.getLogger(__name__)
 
@@ -94,12 +95,15 @@ def main():
     print(context)
 
     prompt_builder = PromptBuilder()
-    prompt = prompt_builder.build(query=query, context=context)
+
+    schema_description: str = RAGResponse.json_schema_for_prompt()
+    prompt = prompt_builder.build(query=query, context=context, schema_description=schema_description)
+    print("------------------This is the prompt---------------------")
     print(prompt)
 
     # Once the prompt is being ready we have to give the prompt to the LLM Service.
     llm_client = GroqLLMClient()
-    llm_response = llm_client.complete(prompt)
+    llm_response = llm_client.complete(prompt, RAGResponse)
     print("--------------This is the LLM response--------------------")
     print(llm_response)
 

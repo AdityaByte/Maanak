@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from app.schema.rag_response_schema import RAGResponse
 
 @dataclass
 class PromptBuilder:
@@ -13,15 +14,20 @@ class PromptBuilder:
 
     no_context_fallback: str = "No relevant standards were found in the knowledge base for this query."
 
+    structured_output_instructions: str = (
+        "\n\nRespond with ONLY a JSON object matching this exact shape, no other text:\n{schema}"
+    )
+
     # We can also provide the chat history to it but for now I'm skipping it.
-    def build(self, query: str, context: str) -> dict[str, any]:
+    def build(self, query: str, context: str, schema_description: str) -> dict[str, any]:
+        system = self.system_template + self.structured_output_instructions.format(schema=schema_description)
         user_content = self._build_user_content(query, context)
         message = {
             "role": "user",
             "content": user_content,
         }
 
-        return {"system": self.system_template, "message": message}
+        return {"system": system, "message": message}
 
 
     def _build_user_content(self, query: str, context: str) -> str:

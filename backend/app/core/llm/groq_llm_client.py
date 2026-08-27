@@ -2,6 +2,10 @@ from dataclasses import dataclass
 from app.core.llm.llm_client import LLMClient
 from langchain_groq import ChatGroq
 import os
+from typing import Type, TypeVar
+from pydantic import BaseModel
+
+T = TypeVar("T", bound=BaseModel) # Using the TypeVar for making it more genric.
 
 @dataclass
 class GroqLLMClient(LLMClient):
@@ -10,6 +14,7 @@ class GroqLLMClient(LLMClient):
     max_tokens: int = 1024
     api_key: str | None = None
     _llm: ChatGroq | None = None
+
 
     def __post_init__(self):
         """This method is for post initialization."""
@@ -24,7 +29,7 @@ class GroqLLMClient(LLMClient):
             api_key=self.api_key
         )
 
-    def complete(self, prompt: dict[str, any]) -> str:
+    def complete(self, prompt: dict[str, any], schema: Type[T]) -> T:
 
         if not self._llm:
             raise ValueError("ChatGroq object is not created.")
@@ -34,5 +39,5 @@ class GroqLLMClient(LLMClient):
             ("human", prompt["message"]["content"])
         ]
 
-        response = self._llm.invoke(messages)
-        return response.content
+        response = self._llm.with_structured_output(schema).invoke(messages)
+        return response
