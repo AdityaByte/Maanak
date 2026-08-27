@@ -23,7 +23,7 @@ export default function HeroSearchInput({
   };
 
   return (
-    <div className="w-full max-w-2xl bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow px-4 py-2 flex items-center gap-3">
+    <div className="w-full max-w-2xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm hover:shadow-md transition-shadow px-4 py-2 flex items-center gap-3">
       {/* File Document Icon */}
       <div className="text-slate-400 pl-1 shrink-0">
         <LuFileText className="w-5 h-5" />
