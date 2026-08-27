@@ -1,31 +1,22 @@
-"""
-response.schema
-================
-Pydantic response schema for BIS (Bureau of Indian Standards) certificate /
-license extraction, used as the structured-output contract for LLM #26.
-"""
-
 from __future__ import annotations
 
 from datetime import date, datetime
 from enum import Enum
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-# Date formats commonly seen on scanned Indian regulatory documents.
+# Date formats.
 _DATE_FORMATS = (
     "%Y-%m-%d",   # ISO
     "%d-%m-%Y",   # 12-05-2023
     "%d/%m/%Y",   # 12/05/2023
     "%d.%m.%Y",   # 12.05.2023
     "%d %b %Y",   # 12 May 2023
-    "%d %B %Y",   # 12 May 2023 (full month name)
+    "%d %B %Y",   # 12 May 2023
 )
 
 
 def _parse_flexible_date(value):
-    """Best-effort parser so the LLM isn't forced to emit strict ISO dates."""
+    """Parsing the dates from the value."""
     if value in (None, "", "NA", "N/A"):
         return None
     if isinstance(value, date):
@@ -65,13 +56,13 @@ class VendorDetails(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    manufacturer_name: Optional[str] = Field(
+    manufacturer_name: str | None = Field(
         default=None, description="Name of the manufacturing unit/vendor."
     )
-    factory_address: Optional[str] = Field(
+    factory_address: str | None = Field(
         default=None, description="Physical address of the manufacturing facility."
     )
-    country: Optional[str] = Field(
+    country: str | None = Field(
         default=None, description="Country of origin/manufacture."
     )
 
@@ -82,16 +73,16 @@ class ProductDetails(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    product_name: Optional[str] = Field(
+    product_name: str | None = Field(
         default=None, description="Name or description of the product/equipment."
     )
-    model_number: Optional[str] = Field(
+    model_number: str | None = Field(
         default=None, description="Model or type designation of the product."
     )
-    brand: Optional[str] = Field(
+    brand: str | None = Field(
         default=None, description="Brand name under which the product is sold."
     )
-    standard_number: Optional[str] = Field(
+    standard_number: str | None = Field(
         default=None,
         description="Applicable Indian Standard number, e.g., IS 13252 (Part 1):2010.",
     )
@@ -116,7 +107,7 @@ class BISResponseSchema(BaseModel):
         default=BISScheme.UNKNOWN,
         description="BIS scheme under which the document was issued: ISI mark licensing or CRS registration.",
     )
-    registration_number: Optional[str] = Field(
+    registration_number: str | None = Field(
         default=None,
         description="BIS Registration/License Number (e.g., R-XXXXXXXX for CRS or CM/L-XXXXXXX for ISI).",
     )
@@ -128,10 +119,10 @@ class BISResponseSchema(BaseModel):
         default_factory=ProductDetails,
         description="Details regarding the product specified in the document.",
     )
-    issue_date: Optional[date] = Field(
+    issue_date: date | None = Field(
         default=None, description="Date of issuance of the BIS license/certificate."
     )
-    valid_upto: Optional[date] = Field(
+    valid_upto: date | None = Field(
         default=None, description="Expiration/validity date of the certificate."
     )
     reasoning: str = Field(
@@ -150,7 +141,7 @@ class BISResponseSchema(BaseModel):
         description="LLM confidence score regarding accuracy of extracted data (0.0 to 1.0).",
     )
 
-    # ---- validators -----------------------------------------------------
+    # Validators.
 
     @field_validator("issue_date", "valid_upto", mode="before")
     @classmethod
