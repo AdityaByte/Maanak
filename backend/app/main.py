@@ -21,6 +21,7 @@ import logging
 from app.core.retriever.retriever import HybridRetriever
 from app.core.retriever.query_router import QueryRouter
 from app.core.context_builder import ContextBuilder
+from app.core.prompt_builder import PromptBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +89,14 @@ def main():
 
     # Now we need to check the context.
     context_builder = ContextBuilder()
-    print(context_builder.build(result))
+    context = context_builder.build(result)
+    print(context)
+
+    prompt_builder = PromptBuilder()
+    prompt = prompt_builder.build(query=query, context=context)
+    print(prompt)
+
+
 
 def test():
     client = init_qdrant_client()
