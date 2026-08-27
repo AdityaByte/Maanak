@@ -20,6 +20,9 @@ from qdrant_client import QdrantClient
 import logging
 from app.core.retriever.retriever import HybridRetriever
 from app.core.retriever.query_router import QueryRouter
+from app.core.context_builder import ContextBuilder
+from app.core.prompt_builder import PromptBuilder
+from app.core.llm.groq_llm_client import GroqLLMClient
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +87,22 @@ def main():
 
     result = retriever.retrieve(query=query)
     print(result)
+
+    # Now we need to check the context.
+    context_builder = ContextBuilder()
+    context = context_builder.build(result)
+    print(context)
+
+    prompt_builder = PromptBuilder()
+    prompt = prompt_builder.build(query=query, context=context)
+    print(prompt)
+
+    # Once the prompt is being ready we have to give the prompt to the LLM Service.
+    llm_client = GroqLLMClient()
+    llm_response = llm_client.complete(prompt)
+    print("--------------This is the LLM response--------------------")
+    print(llm_response)
+
 
 def test():
     client = init_qdrant_client()
