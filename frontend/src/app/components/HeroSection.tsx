@@ -32,18 +32,18 @@ export default function HeroSection() {
   return (
     <section className="flex flex-col items-center justify-center pt-8 pb-10 px-4 text-center">
       {/* Brand Icon Box */}
-      <div className="w-12 h-12 mb-3 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-center text-blue-600 font-bold shadow-sm">
+      <div className="w-12 h-12 mb-3 bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold shadow-sm">
         <span className="tracking-tighter text-lg leading-none">||||</span>
       </div>
 
       {/* Titles */}
-      <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-1">
+      <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight mb-1">
         Maanak
       </h1>
-      <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
+      <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">
         AI POWERED BIS RECOMMENDATION ENGINE
       </p>
-      <p className="text-sm text-slate-600 font-normal mb-8">
+      <p className="text-sm text-slate-600 dark:text-slate-300 font-normal mb-8">
         Smarter Search. Accurate Standards. Better Decisions.
       </p>
 
