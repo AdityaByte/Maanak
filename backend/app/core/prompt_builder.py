@@ -15,11 +15,10 @@ class PromptBuilder:
 
     # We can also provide the chat history to it but for now I'm skipping it.
     def build(self, query: str, context: str) -> dict[str, any]:
-        question, content = self._build_user_content(query, context)
+        user_content = self._build_user_content(query, context)
         message = {
             "role": "user",
-            "question": question,
-            "content": content,
+            "content": user_content,
         }
 
         return {"system": self.system_template, "message": message}
@@ -29,5 +28,5 @@ class PromptBuilder:
         """This method just concat the context with the actual query."""
         if not context.strip():
             context = self.no_context_fallback
-        # return f"Context:\n{context}\n\nQuestion: {query}"
-        return query, context
+        return f"Context:\n{context}\n\nQuestion: {query}"
+        # return query, context
