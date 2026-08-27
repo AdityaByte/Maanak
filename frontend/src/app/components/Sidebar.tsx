@@ -8,7 +8,6 @@ type NavItem = {
   label: string;
   href: string;
   icon: ComponentType;
-  /** Set to true once the real route/page exists. */
   enabled?: boolean;
 };
 
@@ -94,22 +93,20 @@ const UploadIcon = () => (
   </svg>
 );
 
-// Only "/" is a real, built route today. Everything else is rendered
-// disabled until its page actually exists — flip `enabled: true` when
-// the route ships instead of pointing at a link that 404s.
+// All items set to enabled: true with exact routes
 const mainNavItems: NavItem[] = [
   { label: "Dashboard", href: "/", icon: DashboardIcon, enabled: true },
-  { label: "Standards Search", href: "/standards-search", icon: SearchIcon },
-  { label: "AI Assistant", href: "/ai-assistant", icon: AssistantIcon },
-  { label: "Standards Explorer", href: "/standards-explorer", icon: CompassIcon },
-  { label: "Old Standards", href: "/old-standards", icon: HistoryIcon },
-  { label: "Saved Standards", href: "/saved-standards", icon: BookmarkIcon },
-  { label: "Recent Activity", href: "/recent-activity", icon: ActivityIcon },
+  { label: "Standards Search", href: "/standard-search", icon: SearchIcon, enabled: true },
+  { label: "AI Assistant", href: "/ai", icon: AssistantIcon, enabled: true },
+  { label: "Standards Explorer", href: "/standards-explorer", icon: CompassIcon, enabled: true },
+  { label: "Old Standards", href: "/old-standards", icon: HistoryIcon, enabled: true },
+  { label: "Saved Standards", href: "/saved-standards", icon: BookmarkIcon, enabled: true },
+  { label: "Recent Activity", href: "/recent-activity", icon: ActivityIcon, enabled: true },
 ];
 
 const footerNavItems: NavItem[] = [
-  { label: "Settings", href: "/settings", icon: SettingsIcon },
-  { label: "Help", href: "/help", icon: HelpIcon },
+  { label: "Settings", href: "/settings", icon: SettingsIcon, enabled: true },
+  { label: "Help", href: "/help", icon: HelpIcon, enabled: true },
 ];
 
 function NavRow({
@@ -160,7 +157,6 @@ function NavRow({
 }
 
 type SidebarProps = {
-  /** Called when a nav item is clicked — lets Drawer close itself on mobile. */
   onNavigate?: () => void;
 };
 
