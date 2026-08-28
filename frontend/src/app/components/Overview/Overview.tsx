@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import SavedCategories, {
+  Category,
+} from "../SavedCategories/SavedCategories";
 
 type Standard = {
   standard: string;
@@ -54,6 +57,34 @@ async function fetchLatestSearchResults(): Promise<Standard[]> {
   return mockLatestSearchResults;
 }
 
+/*
+ * Temporary category data.
+ *
+ * For now, these categories are hardcoded so the Saved Categories
+ * UI can be developed independently of the backend.
+ *
+ * Later, this will be replaced with the categories returned by
+ * the backend from the Vector DB.
+ */
+const mockCategories: Category[] = [
+  {
+    id: "1",
+    name: "Civil Engineering",
+  },
+  {
+    id: "2",
+    name: "Electrical Engineering",
+  },
+  {
+    id: "3",
+    name: "Mechanical Engineering",
+  },
+  {
+    id: "4",
+    name: "Chemical Engineering",
+  },
+];
+
 const TABS = ["Overview", "Old Standards", "Saved Categories"] as const;
 
 const STATUS_STYLES: Record<Standard["status"], string> = {
@@ -72,6 +103,7 @@ function StatusDot({ status }: { status: Standard["status"] }) {
       : status === "Withdrawn"
         ? "bg-rose-500"
         : "bg-amber-500";
+
   return <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />;
 }
 
@@ -271,8 +303,17 @@ export default function Overview() {
       {/* Saved Categories */}
       {activeTab === "Saved Categories" && (
         <div className="mt-6">
-          {/* Will be implemented separately using
-              the backend Vector DB data. */}
+          <div className="mb-5">
+            <h2 className="text-base font-semibold tracking-tight text-foreground">
+              Saved Categories
+            </h2>
+
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Browse categories available in the standards database
+            </p>
+          </div>
+
+          <SavedCategories categories={mockCategories} />
         </div>
       )}
     </section>
