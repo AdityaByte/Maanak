@@ -1,9 +1,11 @@
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.config.app_container import AppContainer
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.router import api_router
 import dotenv
+
+from app.config.app_container import AppContainer
+from app.api.router import api_router
 from app.config.logger import setup_logging
 
 dotenv.load_dotenv(".env.dev")
@@ -13,15 +15,25 @@ setup_logging()
 async def lifespan(app: FastAPI):
     container = AppContainer()
     container.initialize()
-
     app.state.container = container
     yield
 
 app = FastAPI(lifespan=lifespan)
 
+# Define exact origins (Wildcard '*' fails when allow_credentials=True)
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+# Optional: Load extra origins from .env if present
+env_origins = os.getenv("ALLOWED_ORIGINS")
+if env_origins:
+    origins.extend([origin.strip() for origin in env_origins.split(",") if origin.strip()])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
