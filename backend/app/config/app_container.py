@@ -6,6 +6,7 @@ from app.core.context_builder import ContextBuilder
 from app.core.prompt_builder import PromptBuilder
 from app.core.llm.groq_llm_client import GroqLLMClient
 from qdrant_client import QdrantClient
+from qdrant_client.models import VectorParams, Distance
 import os
 import logging
 
@@ -35,6 +36,9 @@ class AppContainer:
             logger.error(f"Failed to load the environment variable for collection name.")
             exit(1)
 
+        # Making sure that the collection exists.
+        self._create_collection(collection_name, dense_dim)
+
         self.qdrant_vector_store = QdrantVectorStore(
             collection_name="bis_standards",
             dense_dim=dense_dim,
@@ -58,11 +62,29 @@ class AppContainer:
         self.llm_client = GroqLLMClient()
 
 
+    def _create_collection(self, collection_name: str, dense_dim: int) -> None:
+        if self.qdrant_client.collection_exists(collection_name):
+            logger.info(f"Qdrant collection {collection_name} already exists.")
+            return
+        logger.info(f"Creating qdrant collection: {collection_name}")
+        self.qdrant_client.create_collection(
+            collection_name=collection_name,
+            vectors_config = {
+                    # we are using dense for semantic vector.
+                    "dense": VectorParams(
+                        size=dense_dim,
+                        distance=Distance.COSINE
+                    )
+                }
+        )
+        logger.info(f"Qdrant Collection {collection_name} created successfully.")
+
     @classmethod
     def init_qdrant_client(cls) -> QdrantClient:
         url = os.getenv("QDRANT_SERVER_URL")
+        api_key=os.getenv("QDRANT_API_KEY")
         if url == "":
             logger.error(f"Failed to load the environment variable for server url.")
             exit(1)
 
-        return QdrantClient(url=url)
+        return QdrantClient(url=url, api_key=api_key, timeout=60)
