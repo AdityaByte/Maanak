@@ -36,7 +36,7 @@ export default function HeroSearchInput({
         onChange={onChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="w-full bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
+      className="w-full bg-transparent text-sm text-slate-800 dark:text-slate-400 placeholder:text-slate-400 focus:outline-none"
       />
 
       {/* Trailing AI Badge & Send Button */}
