@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import HeroSearchInput from './HeroSearchInput';
 import ActionChip from './ActionChip';
+import SuggestedStandard, { SuggestedStandardData } from './SuggestedStandard';
 import { LuSearch, LuUpload, LuGitCompare, LuLayoutGrid } from 'react-icons/lu';
 
 const ACTION_ITEMS = [
@@ -18,6 +19,7 @@ export default function HeroSection() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<SuggestedStandardData | null>(null);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -34,8 +36,9 @@ export default function HeroSection() {
 
       if (!res.ok) throw new Error(`Status: ${res.status}`);
 
-      const data = await res.json();
+      const data: SuggestedStandardData = await res.json();
       console.log('Search response data:', data);
+      setResult(data);
     } catch (err: any) {
       console.error('Fetch error:', err);
       setError(err.message || 'Error communicating with backend');
@@ -46,11 +49,13 @@ export default function HeroSection() {
 
   return (
     <section className="flex flex-col items-center justify-center pt-8 pb-10 px-4 text-center">
-      <div className="w-12 h-12 mb-3 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-center text-blue-600 font-bold shadow-sm">
+      <div className="w-12 h-12 mb-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center text-blue-400 font-bold shadow-sm">
         <span className="tracking-tighter text-lg leading-none">||||</span>
       </div>
 
-      <h1 className="text-3xl font-bold text-foreground tracking-tight mb-1">Maanak</h1>
+      <h1 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight mb-1">
+        Maanak
+      </h1>
       <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
         AI POWERED BIS RECOMMENDATION ENGINE
       </p>
@@ -58,6 +63,7 @@ export default function HeroSection() {
         Smarter Search. Accurate Standards. Better Decisions.
       </p>
 
+      {/* Search Input */}
       <div className="w-full flex justify-center mb-6">
         <HeroSearchInput
           value={searchQuery}
@@ -67,13 +73,28 @@ export default function HeroSection() {
         />
       </div>
 
-      {loading && <p className="text-sm text-blue-600 animate-pulse mb-3">Searching standards...</p>}
-      {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
-
-      <div className="flex flex-wrap items-center justify-center gap-3 max-w-3xl">
+      {/* Action Chips */}
+      <div className="flex flex-wrap items-center justify-center gap-3 max-w-3xl mb-4">
         {ACTION_ITEMS.map((item) => (
-          <ActionChip key={item.id} icon={item.icon} label={item.label} />
+          <ActionChip
+            key={item.id}
+            icon={item.icon}
+            label={item.label}
+            onClick={() => setSearchQuery(item.label)}
+          />
         ))}
+      </div>
+
+      {/* Error Feedback */}
+      {error && (
+        <p className="text-sm text-red-400 my-3 bg-red-950/20 border border-red-500/30 px-4 py-2 rounded-xl">
+          {error}
+        </p>
+      )}
+
+      {/* Suggested Standard Output (Issue #51) */}
+      <div className="w-full flex justify-center">
+        <SuggestedStandard data={result} loading={loading} />
       </div>
     </section>
   );
