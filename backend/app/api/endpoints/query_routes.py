@@ -5,6 +5,7 @@ from app.schema.rag_response_schema import RAGResponse
 from app.schema.query_schema import QueryRequest
 from app.dependencies import get_query_service
 from app.service.query_service import QueryService
+from app.schema.standard_response import StandardResponse
 
 router = APIRouter(prefix="/query", tags=["Query Routes"])
 
@@ -20,3 +21,7 @@ async def query_handler(request: QueryRequest, query_service: QueryService = Dep
 @router.get("/categories", response_model=list[str])
 async def categories_handler(query_service: QueryService = Depends(get_query_service)):
     return await query_service.handle_categories()
+
+@router.get("/all", response_model=list[StandardResponse])
+async def all_standards_handlder(query_service: QueryService = Depends(get_query_service)):
+    return await query_service.handle_all_standards()
