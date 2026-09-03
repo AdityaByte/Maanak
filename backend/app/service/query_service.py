@@ -6,6 +6,7 @@ from app.core.context_builder import ContextBuilder
 from app.core.retriever.retriever import HybridRetriever
 from app.schema.standard_response import StandardResponse
 from qdrant_client import QdrantClient
+from qdrant_client.models import Filter, FieldCondition, MatchValue
 
 class QueryService:
 
@@ -43,10 +44,23 @@ class QueryService:
         """Return a list of categories that the vector db has."""
         return self.qdrant_vector_store.get_categories()
 
-    async def handle_all_standards(self) -> list[StandardResponse]:
-        """Return a list of all standards containing the metadata."""
+    async def handle_standards(self, category: str | None = None) -> list[StandardResponse]:
+        """Return all standards or standards belonging to a specific category."""
+
+        scroll_filter = None
+        if category:
+            scroll_filter = Filter(
+                must=[
+                    FieldCondition(
+                        key="category",
+                        match=MatchValue(value=category)
+                    )
+                ]
+            )
+
         results, _ = self.qdrant_client.scroll(
             collection_name=self.collection_name,
+            scroll_filter=scroll_filter,
             limit=100,
             with_payload=True,
             with_vectors=False

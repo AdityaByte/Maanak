@@ -22,6 +22,6 @@ async def query_handler(request: QueryRequest, query_service: QueryService = Dep
 async def categories_handler(query_service: QueryService = Depends(get_query_service)):
     return await query_service.handle_categories()
 
-@router.get("/all", response_model=list[StandardResponse])
-async def all_standards_handlder(query_service: QueryService = Depends(get_query_service)):
-    return await query_service.handle_all_standards()
+@router.get("/standards", response_model=list[StandardResponse])
+async def all_standards_handler(category: str | None = None, query_service: QueryService = Depends(get_query_service)):
+    return await query_service.handle_standards(category)
