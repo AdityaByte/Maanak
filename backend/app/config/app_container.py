@@ -61,8 +61,9 @@ class AppContainer:
     @classmethod
     def init_qdrant_client(cls) -> QdrantClient:
         url = os.getenv("QDRANT_SERVER_URL")
+        api_key = os.getenv("QDRANT_API_KEY")
         if url == "":
             logger.error(f"Failed to load the environment variable for server url.")
             exit(1)
 
-        return QdrantClient(url=url)
+        return QdrantClient(url=url, api_key=api_key)
