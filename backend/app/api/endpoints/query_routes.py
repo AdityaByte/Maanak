@@ -8,10 +8,15 @@ from app.service.query_service import QueryService
 
 router = APIRouter(prefix="/query", tags=["Query Routes"])
 
-@router.post("/", response_model=RAGResponse)
+@router.post("/search", response_model=RAGResponse)
 async def query_handler(request: QueryRequest, query_service: QueryService = Depends(get_query_service)):
 
     if request.query.strip() == "":
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="No query found in the request.")
 
     return await query_service.handle_query(request.query)
+
+
+@router.get("/categories", response_model=list[str])
+async def categories_handler(query_service: QueryService = Depends(get_query_service)):
+    return await query_service.handle_categories()
