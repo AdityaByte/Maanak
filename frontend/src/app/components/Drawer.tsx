@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Sidebar from "./Sidebar";
-import { Menu, X, Layers } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 export default function Drawer() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,9 +23,14 @@ export default function Drawer() {
           </button>
 
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Layers className="h-4 w-4" />
-            </div>
+            <Image
+              src="/logo.svg"
+              alt="Maanak Logo"
+              width={32}
+              height={32}
+              className="h-8 w-8 shrink-0 object-contain"
+              priority
+            />
             <span className="text-sm font-bold tracking-tight text-foreground">
               Maanak
             </span>

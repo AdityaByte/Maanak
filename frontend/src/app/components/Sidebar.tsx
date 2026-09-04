@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -13,7 +14,6 @@ import {
   Activity,
   Settings,
   HelpCircle,
-  Layers,
 } from "lucide-react";
 
 type NavItem = {
@@ -129,9 +129,14 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
     <aside className="flex flex-col h-full w-full bg-card border-r border-border text-foreground select-none">
       {/* Brand Header */}
       <div className="flex items-center gap-3 px-5 pt-6 pb-5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary">
-          <Layers className="w-5 h-5" />
-        </div>
+        <Image
+          src="/logo.svg"
+          alt="Maanak Logo"
+          width={36}
+          height={36}
+          className="h-9 w-9 shrink-0 object-contain"
+          priority
+        />
         <div className="min-w-0">
           <h2 className="truncate text-sm font-bold tracking-tight text-foreground">
             Maanak
