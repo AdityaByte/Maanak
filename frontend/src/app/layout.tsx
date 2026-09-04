@@ -1,10 +1,12 @@
-// app/layout.tsx
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+
 import "./globals.css";
+
 import Sidebar from "./components/Sidebar";
 import Drawer from "./components/Drawer";
 import TopNavbar from "./components/TopNavbar";
+import ReduxProvider from "./components/ReduxProvider";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -24,28 +26,35 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`h-full ${plusJakartaSans.variable}`}>
+    <html
+      lang="en"
+      className={`h-full ${plusJakartaSans.variable}`}
+    >
       <body
         className={`${plusJakartaSans.className} flex h-screen overflow-hidden bg-slate-50 text-slate-900 antialiased`}
       >
-        {/* Fixed Desktop Sidebar */}
-        <aside className="hidden h-full w-[260px] shrink-0 border-r border-slate-200/60 bg-white md:flex">
-          <Sidebar />
-        </aside>
+        <ReduxProvider>
+          {/* Fixed Desktop Sidebar */}
+          <aside className="hidden h-full w-[260px] shrink-0 border-r border-slate-200/60 bg-white md:flex">
+            <Sidebar />
+          </aside>
 
-        {/* Mobile Drawer */}
-        <Drawer />
+          {/* Mobile Drawer */}
+          <Drawer />
 
-        {/* Main Content Viewport — the ONLY scrolling container */}
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-            {/* Sticky Header — sticks to top of THIS scroll container */}
-            <TopNavbar />
+          {/* Main Content Viewport */}
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+              {/* Sticky Header */}
+              <TopNavbar />
 
-            {/* Scrollable Page Body */}
-            <div className="px-8 pb-12">{children}</div>
-          </main>
-        </div>
+              {/* Scrollable Page Body */}
+              <div className="px-8 pb-12">
+                {children}
+              </div>
+            </main>
+          </div>
+        </ReduxProvider>
       </body>
     </html>
   );
