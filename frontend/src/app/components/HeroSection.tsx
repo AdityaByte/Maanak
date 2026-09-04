@@ -1,22 +1,30 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import HeroSearchInput from './HeroSearchInput';
-import ActionChip from './ActionChip';
-import SuggestedStandard, { SuggestedStandardData } from './SuggestedStandard';
-import { LuSearch, LuUpload, LuGitCompare, LuLayoutGrid } from 'react-icons/lu';
+import React, { useState } from "react";
+import HeroSearchInput from "./HeroSearchInput";
+import ActionChip from "./ActionChip";
+import SuggestedStandard, { SuggestedStandardData } from "./SuggestedStandard";
+import {
+  Search,
+  UploadCloud,
+  GitCompare,
+  LayoutGrid,
+  AlertCircle,
+  RotateCw,
+  Layers,
+} from "lucide-react";
 
 const ACTION_ITEMS = [
-  { id: 'search', label: 'Search Standards', icon: LuSearch },
-  { id: 'upload', label: 'Upload a Document', icon: LuUpload },
-  { id: 'compare', label: 'Compare Standards', icon: LuGitCompare },
-  { id: 'categories', label: 'Explore Categories', icon: LuLayoutGrid },
+  { id: "search", label: "Search Standards", icon: Search },
+  { id: "upload", label: "Upload a Document", icon: UploadCloud },
+  { id: "compare", label: "Compare Standards", icon: GitCompare },
+  { id: "categories", label: "Explore Categories", icon: LayoutGrid },
 ];
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 export default function HeroSection() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SuggestedStandardData | null>(null);
@@ -37,29 +45,30 @@ export default function HeroSection() {
       if (!res.ok) throw new Error(`Status: ${res.status}`);
 
       const data: SuggestedStandardData = await res.json();
-      console.log('Search response data:', data);
+      console.log("Search response data:", data);
       setResult(data);
     } catch (err: any) {
-      console.error('Fetch error:', err);
-      setError(err.message || 'Error communicating with backend');
+      console.error("Fetch error:", err);
+      setError(err.message || "Error communicating with backend");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section className="flex flex-col items-center justify-center pt-8 pb-10 px-4 text-center">
-      <div className="w-12 h-12 mb-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center text-blue-400 font-bold shadow-sm">
-        <span className="tracking-tighter text-lg leading-none">||||</span>
+    <section className="flex flex-col items-center justify-center pt-6 pb-8 px-4 text-center">
+      {/* Brand Emblem */}
+      <div className="mb-4 flex h-13 w-13 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary shadow-xs">
+        <Layers className="h-6 w-6" />
       </div>
 
-      <h1 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight mb-1">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground mb-1.5">
         Maanak
       </h1>
-      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+      <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2">
         AI POWERED BIS RECOMMENDATION ENGINE
       </p>
-      <p className="text-sm text-muted-foreground font-normal mb-8">
+      <p className="text-sm sm:text-base text-muted-foreground font-normal mb-8 max-w-md">
         Smarter Search. Accurate Standards. Better Decisions.
       </p>
 
@@ -74,7 +83,7 @@ export default function HeroSection() {
       </div>
 
       {/* Action Chips */}
-      <div className="flex flex-wrap items-center justify-center gap-3 max-w-3xl mb-4">
+      <div className="flex flex-wrap items-center justify-center gap-2.5 max-w-3xl mb-6">
         {ACTION_ITEMS.map((item) => (
           <ActionChip
             key={item.id}
@@ -85,14 +94,27 @@ export default function HeroSection() {
         ))}
       </div>
 
-      {/* Error Feedback */}
+      {/* Error Feedback with Retry */}
       {error && (
-        <p className="text-sm text-red-400 my-3 bg-red-950/20 border border-red-500/30 px-4 py-2 rounded-xl">
-          {error}
-        </p>
+        <div className="my-4 flex w-full max-w-2xl items-center justify-between gap-3 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-left shadow-xs">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <AlertCircle className="h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
+            <p className="text-xs sm:text-sm font-medium text-rose-700 dark:text-rose-300 truncate">
+              {error}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleSearch}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white shadow-2xs hover:bg-rose-700 active:scale-95 transition-all"
+          >
+            <RotateCw className="h-3.5 w-3.5" />
+            <span>Retry</span>
+          </button>
+        </div>
       )}
 
-      {/* Suggested Standard Output (Issue #51) */}
+      {/* Suggested Standard Output */}
       <div className="w-full flex justify-center">
         <SuggestedStandard data={result} loading={loading} />
       </div>

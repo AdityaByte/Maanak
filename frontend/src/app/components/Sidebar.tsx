@@ -33,6 +33,10 @@ const mainNavItems: NavItem[] = [
   { label: "Recent Activity", href: "/recent-activity", icon: Activity, enabled: true },
 ];
 
+function SearchIconWrapper(props: { className?: string }) {
+  return <Search {...props} />;
+}
+
 const footerNavItems: NavItem[] = [
   { label: "Settings", href: "/settings", icon: Settings, enabled: true },
   { label: "Help & Docs", href: "/help", icon: HelpCircle, enabled: true },
@@ -89,6 +93,9 @@ const NavRow = React.memo(function NavRow({
         }`}
       />
       <span className="truncate">{item.label}</span>
+      {isActive && (
+        <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary-foreground/80" />
+      )}
     </Link>
   );
 });

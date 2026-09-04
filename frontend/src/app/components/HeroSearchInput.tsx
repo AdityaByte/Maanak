@@ -1,32 +1,45 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { LuFileText, LuSparkles, LuSend } from 'react-icons/lu';
+import React from "react";
+import { FileText, Sparkles, Send, X } from "lucide-react";
 
-interface HeroSearchInputProps {
+export interface HeroSearchInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSearch: () => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export default function HeroSearchInput({
   value,
   onChange,
   onSearch,
-  placeholder = 'Ask about BIS standards or search by standard number, title, or topic...',
+  placeholder = "Ask about BIS standards or search by standard number, title, or topic...",
+  disabled = false,
 }: HeroSearchInputProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter" && !disabled) {
       onSearch();
     }
   };
 
+  const handleClear = () => {
+    const syntheticEvent = {
+      target: { value: "" },
+    } as React.ChangeEvent<HTMLInputElement>;
+    onChange(syntheticEvent);
+  };
+
   return (
-    <div className="w-full max-w-2xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm hover:shadow-md transition-shadow px-4 py-2 flex items-center gap-3">
+    <div
+      className={`group relative flex w-full max-w-2xl items-center gap-3 rounded-2xl border border-border bg-card px-4 py-2.5 shadow-xs transition-all duration-200 hover:border-border/80 hover:shadow-md focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 ${
+        disabled ? "opacity-75 pointer-events-none" : ""
+      }`}
+    >
       {/* File Document Icon */}
-      <div className="text-slate-400 pl-1 shrink-0">
-        <LuFileText className="w-5 h-5" />
+      <div className="shrink-0 pl-1 text-muted-foreground transition-colors group-focus-within:text-primary">
+        <FileText className="h-5 w-5" />
       </div>
 
       {/* Input */}
@@ -35,24 +48,38 @@ export default function HeroSearchInput({
         value={value}
         onChange={onChange}
         onKeyDown={handleKeyDown}
+        disabled={disabled}
         placeholder={placeholder}
-        className="w-full bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
+        className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none"
       />
 
+      {/* Clear Button (if value exists) */}
+      {value && !disabled && (
+        <button
+          type="button"
+          onClick={handleClear}
+          aria-label="Clear search input"
+          className="shrink-0 rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
+
       {/* Trailing AI Badge & Send Button */}
-      <div className="flex items-center gap-2 shrink-0">
-        <div className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 bg-slate-100 rounded-lg select-none">
-          <LuSparkles className="w-3.5 h-3.5 text-blue-600" />
+      <div className="flex shrink-0 items-center gap-2">
+        <div className="flex items-center gap-1.5 rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground select-none">
+          <Sparkles className="h-3.5 w-3.5 text-primary" />
           <span>AI Search</span>
         </div>
 
         <button
           type="button"
           onClick={onSearch}
+          disabled={disabled || !value.trim()}
           aria-label="Submit Search"
-          className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors duration-150 shadow-sm flex items-center justify-center"
+          className="flex h-8.5 w-8.5 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs transition-all duration-150 hover:bg-primary/90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
-          <LuSend className="w-4 h-4" />
+          <Send className="h-4 w-4" />
         </button>
       </div>
     </div>

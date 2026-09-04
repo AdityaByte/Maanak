@@ -31,7 +31,7 @@ export default function RootLayout({
       className={`h-full ${plusJakartaSans.variable}`}
     >
       <body
-        className={`${plusJakartaSans.className} flex h-screen overflow-hidden bg-slate-50 text-slate-900 antialiased`}
+        className={`${plusJakartaSans.className} flex h-screen overflow-hidden bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary`}
       >
         <ReduxProvider>
           {/* Fixed Desktop Sidebar */}

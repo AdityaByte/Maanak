@@ -1,22 +1,25 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { IconType } from 'react-icons';
+import React from "react";
 
 export interface ActionChipProps {
-  icon: IconType;
+  icon: React.ComponentType<{ className?: string }>;
   label: string;
   onClick: () => void;
 }
 
-export default function ActionChip({ icon: Icon, label, onClick }: ActionChipProps) {
+export default function ActionChip({
+  icon: Icon,
+  label,
+  onClick,
+}: ActionChipProps) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-2 px-4 py-2 text-xs md:text-sm font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-150 active:scale-[0.98]"
+      className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs sm:text-sm font-medium text-foreground/80 shadow-2xs transition-all duration-150 hover:bg-muted hover:text-foreground hover:border-border/90 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
     >
-      <Icon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+      <Icon className="h-3.5 w-3.5 text-muted-foreground transition-colors" />
       <span>{label}</span>
     </button>
   );

@@ -5,3 +5,4 @@ langchain-community
 pytest
 qdrant-client
 langchain-groq
+sentence-transformers

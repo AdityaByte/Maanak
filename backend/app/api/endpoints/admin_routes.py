@@ -8,4 +8,4 @@ router = APIRouter(prefix="/admin", tags=["Admin Routes"])
 @router.get("/load")
 async def handle_load_data(admin_service: AdminService = Depends(get_admin_service)) -> dict[str, Any]:
     """This route mainly loads the file data to the vector data in some manual situation"""
-    return admin_service.load_data()
+    return await admin_service.load_data()
