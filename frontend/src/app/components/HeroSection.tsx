@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import HeroSearchInput from "./HeroSearchInput";
 import ActionChip from "./ActionChip";
 import SuggestedStandard, { SuggestedStandardData } from "./SuggestedStandard";
@@ -11,7 +12,6 @@ import {
   LayoutGrid,
   AlertCircle,
   RotateCw,
-  Layers,
 } from "lucide-react";
 
 const ACTION_ITEMS = [
@@ -58,8 +58,15 @@ export default function HeroSection() {
   return (
     <section className="flex flex-col items-center justify-center pt-6 pb-8 px-4 text-center">
       {/* Brand Emblem */}
-      <div className="mb-4 flex h-13 w-13 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary shadow-xs">
-        <Layers className="h-6 w-6" />
+      <div className="mb-4 flex items-center justify-center">
+        <Image
+          src="/logo.svg"
+          alt="Maanak Logo"
+          width={84}
+          height={84}
+          className="h-20 w-20 sm:h-22 sm:w-22 object-contain transition-transform duration-300 hover:scale-105"
+          priority
+        />
       </div>
 
       <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground mb-1.5">
