@@ -1,30 +1,72 @@
-import React from "react";
-import { Search } from "lucide-react";
-import Footer from "../components/Footer";
+"use client";
+
+import { useEffect } from "react";
+
+import { useDispatch, useSelector } from "react-redux";
+
+import type {
+  AppDispatch,
+  RootState,
+} from "@/redux/store";
+
+import {
+  fetchCategories,
+  fetchStandards,
+} from "@/redux/standardsSlice";
+
+import SearchBar from "../components/SearchBar";
+import CategoryTabs from "../components/CategoryTabs";
+import StandardList from "../components/StandardList";
 
 export default function StandardSearchPage() {
+  const dispatch = useDispatch<AppDispatch>();
+
+  const {
+    standards,
+    categories,
+  } = useSelector(
+    (state: RootState) => state.standards
+  );
+
+  useEffect(() => {
+    if (standards.length === 0) {
+      dispatch(fetchStandards());
+    }
+
+    if (categories.length === 0) {
+      dispatch(fetchCategories());
+    }
+  }, [
+    dispatch,
+    standards.length,
+    categories.length,
+  ]);
+
   return (
-    <div className="w-full space-y-8">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary shadow-xs">
-          <Search className="h-5 w-5" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Standards Search
-          </h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Search and filter official BIS technical standards.
-          </p>
-        </div>
+    <div className="mx-auto max-w-7xl">
+
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-semibold text-foreground">
+          Standards Search
+        </h1>
+
+        <p className="mt-2 text-muted-foreground">
+          Search and explore BIS standards.
+        </p>
       </div>
 
-      <div className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-12 text-center text-sm text-muted-foreground shadow-xs">
-        <Search className="h-8 w-8 text-muted-foreground/40 mb-3" />
-        <p>Content for Standards Search will be rendered here.</p>
+      {/* Search */}
+      <SearchBar />
+
+      {/* Categories */}
+      <CategoryTabs />
+
+      {/* Standards */}
+      <div className="mt-6">
+        <StandardList />
       </div>
 
-      <Footer />
     </div>
   );
 }
