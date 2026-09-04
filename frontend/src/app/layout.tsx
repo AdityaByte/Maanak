@@ -26,10 +26,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`h-full ${plusJakartaSans.variable}`}>
       <body
-        className={`${plusJakartaSans.className} flex h-screen overflow-hidden bg-slate-50 text-slate-900 antialiased`}
+        className={`${plusJakartaSans.className} flex h-screen overflow-hidden bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary`}
       >
         {/* Fixed Desktop Sidebar */}
-        <aside className="hidden h-full w-[260px] shrink-0 border-r border-slate-200/60 bg-white md:flex">
+        <aside className="hidden h-full w-[268px] shrink-0 border-r border-border bg-card md:flex">
           <Sidebar />
         </aside>
 
@@ -39,11 +39,13 @@ export default function RootLayout({
         {/* Main Content Viewport — the ONLY scrolling container */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-            {/* Sticky Header — sticks to top of THIS scroll container */}
+            {/* Sticky Header */}
             <TopNavbar />
 
             {/* Scrollable Page Body */}
-            <div className="px-8 pb-12">{children}</div>
+            <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-14 pt-2">
+              {children}
+            </div>
           </main>
         </div>
       </body>
