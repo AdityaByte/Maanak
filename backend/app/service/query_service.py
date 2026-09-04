@@ -7,6 +7,8 @@ from app.core.retriever.retriever import HybridRetriever
 from app.schema.standard_response import StandardResponse
 from qdrant_client import QdrantClient
 from qdrant_client.models import Filter, FieldCondition, MatchValue
+from qdrant_client.models import Filter, FieldCondition, MatchValue, Range
+from qdrant_client.http.models import Filter, FieldCondition, Range, PayloadSchemaType
 
 class QueryService:
 
@@ -77,3 +79,58 @@ class QueryService:
             certification_type=point.payload.get("certification_type"),
             certificate_mandatory=point.payload.get("certification_mandatory"),
         ) for point in results]
+
+
+
+    async def handle_old_standards(self) -> list[StandardResponse]:
+        # Ensure Qdrant indexes exist for range filters to avoid 400 Bad Request
+        self.qdrant_client.create_payload_index(
+            collection_name=self.collection_name,
+            field_name="year_published",
+            field_schema=PayloadSchemaType.INTEGER
+        )
+        self.qdrant_client.create_payload_index(
+            collection_name=self.collection_name,
+            field_name="last_amended",
+            field_schema=PayloadSchemaType.INTEGER
+        )
+
+        scroll_filter = Filter(
+            should=[
+                FieldCondition(
+                    key="year_published",
+                    range=Range(lt=2000)
+                ),
+                FieldCondition(
+                    key="last_amended",
+                    range=Range(gte=2000, lte=2004)
+                )
+            ]
+        )
+
+        results, _ = self.qdrant_client.scroll(
+            collection_name=self.collection_name,
+            scroll_filter=scroll_filter,
+            limit=100,
+            with_payload=True,
+            with_vectors=False
+        )
+
+        standards = []
+        for point in results:
+            payload = point.payload or {}
+            standards.append(
+                StandardResponse(
+                    id=payload.get("id"),
+                    title=payload.get("title", ""),
+                    content=payload.get("page_content", ""),
+                    category=payload.get("category", ""),
+                    sub_category=payload.get("subcategory"),
+                    year_published=payload.get("year_published"),
+                    last_amended=payload.get("last_amended"),
+                    certification_type=payload.get("certification_type"),
+                    certificate_mandatory=payload.get("certification_mandatory", False),
+                )
+            )
+
+        return standards

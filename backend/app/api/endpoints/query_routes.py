@@ -25,3 +25,8 @@ async def categories_handler(query_service: QueryService = Depends(get_query_ser
 @router.get("/standards", response_model=list[StandardResponse])
 async def all_standards_handler(category: str | None = None, query_service: QueryService = Depends(get_query_service)):
     return await query_service.handle_standards(category)
+
+
+@router.get("/old-standards", response_model=list[StandardResponse])
+async def get_old_standards(query_service: QueryService = Depends(get_query_service)):
+    return await query_service.handle_old_standards()
