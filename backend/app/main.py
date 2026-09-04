@@ -20,13 +20,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# Define exact origins (Wildcard '*' fails when allow_credentials=True)
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
 
-# Optional: Load extra origins from .env if present
 env_origins = os.getenv("ALLOWED_ORIGINS")
 if env_origins:
     origins.extend([origin.strip() for origin in env_origins.split(",") if origin.strip()])

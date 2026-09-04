@@ -24,6 +24,7 @@ class AppContainer:
         self.context_builder: ContextBuilder | None = None
         self.prompt_builder: PromptBuilder | None = None
         self.llm_client: GroqLLMClient | None = None
+        self.collection_name: str | None = None
 
     def initialize(self):
         self.embedding_manager = EmbeddingManager()
@@ -35,6 +36,8 @@ class AppContainer:
         if collection_name == "":
             logger.error(f"Failed to load the environment variable for collection name.")
             exit(1)
+
+        self.collection_name = collection_name
 
         # Making sure that the collection exists.
         self._create_collection(collection_name, dense_dim)
