@@ -21,8 +21,7 @@ const ACTION_ITEMS = [
   { id: "categories", label: "Explore Categories", icon: LayoutGrid },
 ];
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/query";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 export default function HeroSection() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,9 +36,9 @@ export default function HeroSection() {
     setError(null);
 
     try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch(`${API_URL}/query/search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: searchQuery }),
       });
 
