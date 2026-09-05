@@ -1,5 +1,9 @@
 # AI Powered Standards Recommendation Engine
-![Maanak Logo](./assets/logo.svg)
+<p align="center">
+  <img src="frontend/src/app/icon.svg"
+       alt="Maanak Logo"
+       width="180">
+</p>
 
 # Maanak
 
@@ -75,9 +79,9 @@ Maanak/
 │   ├── app/
 │   │   ├── api/            # Route endpoints and request validation
 │   │   ├── core/           # Configuration and environment management
-│   │   ├── db/             # Qdrant client connection & query handlers
-│   │   ├── pipelines/      # Augmentation, Retrieval, & Generation pipelines
-│   │   └── services/       # Transformer embeddings and LLM integrations
+│   │   ├── config/         # Configuration Files
+│   │   ├── schema/         # Hold the Data transfer Object files
+│   │   └── service/        # Transformer embeddings and LLM integrations
 │   ├── tests/              # Unit and integration test suites
 │   └── requirements.txt    # Python dependencies
 ├── frontend/               # Next.js (TypeScript) Client
@@ -96,7 +100,6 @@ Maanak/
 
 ---
 ## Architecture
-
 ![Architecture](https://drive.google.com/uc?export=view&id=1xAVKcrNKXCUnktxLab88NwSRP530_hmS)
 ---
 ## Getting Started
@@ -106,7 +109,7 @@ Maanak/
 * Python 3.9 or higher
 * Node.js v18 or higher
 * Running instance of Qdrant Vector Database (Local or Cloud)
-* API Key for Grok (xAI)
+* API Key for Groq
 
 ---
 
@@ -119,25 +122,26 @@ cd backend
 
 2. Create and activate a virtual environment:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+uv init
+source venv/bin/activate
 ```
 
 3. Install required Python packages:
 ```bash
-pip install -r requirements.txt
+uv add -r requirements.txt
 ```
 
 4. Configure environment variables (create a `.env` file in `backend/`):
 ```env
-QDRANT_URL=http://localhost:6333
-QDRANT_API_KEY=your_qdrant_key
-XAI_API_KEY=your_grok_api_key
+QDRANT_SERVER_URL=http://localhost:6333
+QDRANT_API_KEY=qdrant_api_key_if_using_cloud_version
+QDRANT_COLLECTION_NAME=bis_standards
+GROQ_API_KEY=groq_api_key
 ```
 
 5. Start the FastAPI backend server:
 ```bash
-uvicorn app.main:app --reload --port 8000
+uv run python -m app.main
 ```
 
 ---
@@ -156,7 +160,7 @@ npm install
 
 3. Configure local environment variables (create `.env.local` in `frontend/`):
 ```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=http://localhost:8080/api
 ```
 
 4. Run the development server:
@@ -167,14 +171,12 @@ npm run dev
 Access points:
 
 * **Web Client**: `http://localhost:3000`
-* **API Documentation**: `http://localhost:8000/docs`
+* **API Documentation**: `http://localhost:8080/docs`
 
 ---
 
 ## User Interface
-
-
- ![Maanak dashboard](./assets/maanak_dashboard.jpeg)
+![Snapshot](https://drive.google.com/uc?export=view&id=15LfXcNeXwr7zi3pq3WTD3aKL0TQLv48j)
 
 ---
 
