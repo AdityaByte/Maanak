@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
+import { fetchCategories, fetchOldStandards } from "@/redux/standardsSlice";
 import SavedCategories, {
   Category,
 } from "../AvailableCategories/AvailableCategories";
@@ -8,136 +11,148 @@ import Skeleton from "../ui/Skeleton";
 import { ArrowRight, Inbox, AlertCircle } from "lucide-react";
 
 type Standard = {
-  standard: string;
-  title: string;
-  domain: string;
-  published: string;
-  status: "Active" | "Withdrawn" | "Superseded";
+  standard_number: string;
+  relevance: string;
 };
 
-const mockLatestSearchResults: Standard[] = [
-  {
-    standard: "IS 456 : 2000",
-    title: "Plain and Reinforced Concrete - Code of Practice",
-    domain: "Civil Engineering",
-    published: "Oct 2000",
-    status: "Active",
-  },
-  {
-    standard: "IS 800 : 2007",
-    title: "General Construction in Steel - Code of Practice",
-    domain: "Civil Engineering",
-    published: "Dec 2007",
-    status: "Active",
-  },
-  {
-    standard: "IS 1893 : Part 1 : 2016",
-    title: "Criteria for Earthquake Resistant Design of Structures",
-    domain: "Civil Engineering",
-    published: "Dec 2016",
-    status: "Withdrawn",
-  },
-  {
-    standard: "IS 13920 : 2016",
-    title: "Ductile Design and Detailing of Reinforced Concrete",
-    domain: "Civil Engineering",
-    published: "Nov 2016",
-    status: "Superseded",
-  },
-];
-
-/*
- * Temporary data source.
- *
- * For now, this returns mock data so the Overview can be developed
- * independently of the backend.
- *
- * Later, this function will fetch the latest search results from
- * the backend cache.
- */
-async function fetchLatestSearchResults(): Promise<Standard[]> {
-  return mockLatestSearchResults;
-}
-
-/*
- * Temporary category data.
- *
- * For now, these categories are hardcoded so the Available Categories
- * UI can be developed independently of the backend.
- *
- * Later, this will be replaced with the categories returned by
- * the backend from the Vector DB.
- */
-const mockCategories: Category[] = [
-  {
-    id: "1",
-    name: "Civil Engineering",
-  },
-  {
-    id: "2",
-    name: "Electrical Engineering",
-  },
-  {
-    id: "3",
-    name: "Mechanical Engineering",
-  },
-  {
-    id: "4",
-    name: "Chemical Engineering",
-  },
-];
-
-const TABS = ["Overview", "Old Standards", "Available Categories"] as const;
-
-const STATUS_STYLES: Record<Standard["status"], string> = {
-  Active:
-    "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20",
-  Withdrawn:
-    "bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20",
-  Superseded:
-    "bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20",
-};
-
-function StatusDot({ status }: { status: Standard["status"] }) {
-  const dotColor =
-    status === "Active"
-      ? "bg-emerald-500"
-      : status === "Withdrawn"
-        ? "bg-rose-500"
-        : "bg-amber-500";
-
-  return <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />;
-}
+const TABS = [
+  "Overview",
+  "Old Standards",
+  "Available Categories",
+] as const;
 
 export default function Overview() {
   const [activeTab, setActiveTab] =
     useState<(typeof TABS)[number]>("Overview");
+
+  // --------------------------------------------------
+  // Search Results State
+  // --------------------------------------------------
+
   const [searchResults, setSearchResults] = useState<Standard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadLatestSearchResults = async () => {
+  // --------------------------------------------------
+  // Redux
+  // --------------------------------------------------
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  const {
+    categories,
+    categoriesLoading,
+    categoriesError,
+
+    oldStandards,
+    oldStandardsLoading,
+    oldStandardsError,
+  } = useSelector(
+    (state: RootState) => state.standards
+  );
+
+  // --------------------------------------------------
+  // Load Recent Search Results
+  // --------------------------------------------------
+
+  const loadLatestSearchResults = () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const results = await fetchLatestSearchResults();
-      setSearchResults(results);
+      // Get stored search history
+      const storedSearches = localStorage.getItem("searchResults");
+
+      // No searches have been stored yet
+      if (!storedSearches) {
+        setSearchResults([]);
+        return;
+      }
+
+      // Parse localStorage data
+      const searchHistory = JSON.parse(storedSearches);
+
+      // Make sure stored data is an array
+      if (!Array.isArray(searchHistory) || searchHistory.length === 0) {
+        setSearchResults([]);
+        return;
+      }
+
+      const recentStandards: Standard[] = [];
+
+      for (const search of searchHistory) {
+        const citations = search?.response?.citations;
+
+        if (!Array.isArray(citations)) {
+          continue;
+        }
+
+        for (const citation of citations) {
+          if (
+            citation &&
+            typeof citation.standard_number === "string" &&
+            citation.standard_number.trim() !== ""
+          ) {
+            recentStandards.push({
+              standard_number: citation.standard_number,
+              relevance: citation.relevance || "",
+            });
+          }
+
+          if (recentStandards.length === 5) {
+            break;
+          }
+        }
+
+        if (recentStandards.length === 5) {
+          break;
+        }
+      }
+
+      setSearchResults(recentStandards);
     } catch (err) {
-      console.error("Failed to load latest search results:", err);
-      setError("Unable to load latest search results.");
+      console.error("Failed to load recent search results:", err);
+      setError("Unable to load recent search results.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  // --------------------------------------------------
+  // Load Search Results on Mount
+  // --------------------------------------------------
+
   useEffect(() => {
     loadLatestSearchResults();
   }, []);
 
+  // --------------------------------------------------
+  // Fetch Dashboard Data on Mount
+  // --------------------------------------------------
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+    dispatch(fetchOldStandards());
+  }, [dispatch]);
+
+  // --------------------------------------------------
+  // Show ONLY 9 Categories
+  // --------------------------------------------------
+
+  const categoryData: Category[] = categories
+    .slice(0, 9)
+    .map((category, index) => ({
+      id: `${index + 1}`,
+      name: category,
+    }));
+
   return (
     <section className="w-full bg-background px-4 sm:px-6 lg:px-8 py-6 text-foreground">
-      {/* Tabs */}
+
+      {/* ==================================================
+          TABS
+      ================================================== */}
+
       <div className="border-b border-border/80">
         <div className="flex gap-6 sm:gap-8">
           {TABS.map((tab) => (
@@ -162,9 +177,13 @@ export default function Overview() {
         </div>
       </div>
 
-      {/* Overview */}
+      {/* ==================================================
+          OVERVIEW
+      ================================================== */}
+
       {activeTab === "Overview" && (
         <div className="mt-6">
+
           {/* Heading */}
           <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -172,7 +191,7 @@ export default function Overview() {
                 Latest Search Results
               </h2>
               <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
-                Your most recently searched standards
+                Your 5 most recently searched standards
               </p>
             </div>
 
@@ -185,11 +204,11 @@ export default function Overview() {
             </button>
           </div>
 
-          {/* Loading Skeleton */}
+          {/* LOADING SKELETON */}
           {isLoading && (
             <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-xs space-y-3">
               <div className="space-y-2">
-                {[...Array(4)].map((_, i) => (
+                {[...Array(5)].map((_, i) => (
                   <div
                     key={i}
                     className="flex items-center gap-4 py-2 border-b border-border/40 last:border-0"
@@ -209,7 +228,7 @@ export default function Overview() {
             </div>
           )}
 
-          {/* Error */}
+          {/* ERROR */}
           {!isLoading && error && (
             <div className="flex items-center justify-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-8 text-center shadow-xs">
               <AlertCircle className="h-5 w-5 text-rose-600 dark:text-rose-400" />
@@ -219,7 +238,7 @@ export default function Overview() {
             </div>
           )}
 
-          {/* Empty state */}
+          {/* EMPTY STATE */}
           {!isLoading && !error && searchResults.length === 0 && (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-10 text-center shadow-xs">
               <Inbox className="h-8 w-8 text-muted-foreground/60 mb-2" />
@@ -229,27 +248,18 @@ export default function Overview() {
             </div>
           )}
 
-          {/* Table */}
+          {/* TABLE */}
           {!isLoading && !error && searchResults.length > 0 && (
             <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[760px] border-collapse text-left">
+                <table className="w-full min-w-[600px] border-collapse text-left">
                   <thead>
                     <tr className="border-b border-border bg-muted/40 text-left">
                       <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Standard
+                        Standard Number
                       </th>
                       <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Title
-                      </th>
-                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Domain
-                      </th>
-                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Published
-                      </th>
-                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Status
+                        Relevance
                       </th>
                       <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         Action
@@ -258,38 +268,17 @@ export default function Overview() {
                   </thead>
 
                   <tbody className="divide-y divide-border/60">
-                    {searchResults.map((item) => (
+                    {searchResults.map((item, index) => (
                       <tr
-                        key={item.standard}
+                        key={`${item.standard_number}-${index}`}
                         className="group transition-colors hover:bg-muted/40"
                       >
                         <td className="px-5 py-3.5 text-sm font-semibold text-foreground font-mono">
-                          {item.standard}
+                          {item.standard_number}
                         </td>
-
-                        <td className="px-5 py-3.5 text-sm text-foreground/90 font-medium">
-                          {item.title}
-                        </td>
-
                         <td className="px-5 py-3.5 text-sm text-muted-foreground">
-                          {item.domain}
+                          {item.relevance || "Standard match"}
                         </td>
-
-                        <td className="px-5 py-3.5 text-sm text-muted-foreground">
-                          {item.published}
-                        </td>
-
-                        <td className="px-5 py-3.5">
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              STATUS_STYLES[item.status]
-                            }`}
-                          >
-                            <StatusDot status={item.status} />
-                            {item.status}
-                          </span>
-                        </td>
-
                         <td className="px-5 py-3.5 text-right text-sm">
                           <button
                             type="button"
@@ -308,28 +297,31 @@ export default function Overview() {
         </div>
       )}
 
-      {/* Old Standards */}
+      {/* ==================================================
+          OLD STANDARDS
+      ================================================== */}
+
       {activeTab === "Old Standards" && (
         <div className="mt-6">
-          {/* Intentionally left blank.
-              Implementation will be done later. */}
+          {/* Intentionally handled on its dedicated page or tab */}
         </div>
       )}
 
-      {/* Available Categories */}
+      {/* ==================================================
+          AVAILABLE CATEGORIES
+      ================================================== */}
+
       {activeTab === "Available Categories" && (
         <div className="mt-6">
           <div className="mb-5">
             <h2 className="text-base font-bold tracking-tight text-foreground">
               Available Categories
             </h2>
-
             <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
               Browse categories available in the standards database
             </p>
           </div>
-
-          <SavedCategories categories={mockCategories} />
+          <SavedCategories categories={categoryData} />
         </div>
       )}
     </section>

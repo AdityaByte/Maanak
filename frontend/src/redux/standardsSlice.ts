@@ -1,4 +1,8 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  createAsyncThunk,
+  createSlice,
+  PayloadAction,
+} from "@reduxjs/toolkit";
 import type { Standard } from "@/types/standard";
 
 const API_URL =
@@ -6,108 +10,112 @@ const API_URL =
 
 interface StandardsState {
   standards: Standard[];
-  oldStandards: Standard[];
   categories: string[];
   selectedCategory: string;
   searchQuery: string;
-  loadingCategories: boolean;
-  loadingOldStandards: boolean;
-  loadingStandards: boolean;
-  errorCategories: string | null;
-  errorOldStandards: string | null;
-  errorStandards: string | null;
+
+  loading: boolean;
+  error: string | null;
+
+  // Categories-specific loading/error state
+  categoriesLoading: boolean;
+  categoriesLoaded: boolean;
+  categoriesError: string | null;
+
+  // Old Standards-specific state
+  oldStandards: Standard[];
+  oldStandardsLoading: boolean;
+  oldStandardsLoaded: boolean;
+  oldStandardsError: string | null;
 }
 
 const initialState: StandardsState = {
   standards: [],
-  oldStandards: [],
   categories: [],
   selectedCategory: "All",
   searchQuery: "",
-  loadingCategories: false,
-  loadingOldStandards: false,
-  loadingStandards: false,
-  errorCategories: null,
-  errorOldStandards: null,
-  errorStandards: null,
+
+  loading: false,
+  error: null,
+
+  categoriesLoading: false,
+  categoriesLoaded: false,
+  categoriesError: null,
+
+  oldStandards: [],
+  oldStandardsLoading: false,
+  oldStandardsLoaded: false,
+  oldStandardsError: null,
 };
 
-// 1. Fetch Categories: GET /api/query/categories
+// ======================================================
+// FETCH CATEGORIES
+// ======================================================
+
 export const fetchCategories = createAsyncThunk<
   string[],
   void,
-  { state: { standards: StandardsState } }
+  {
+    state: {
+      standards: StandardsState;
+    };
+  }
 >(
   "standards/fetchCategories",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await fetch(`${API_URL}/query/categories`);
-      if (!response.ok) {
-        throw new Error(`Categories fetch failed: ${response.status}`);
-      }
-      const data = await response.json();
-      return Array.isArray(data) ? data : data.categories || [];
-    } catch (err: any) {
-      return rejectWithValue(err.message || "Failed to fetch categories");
+  async () => {
+    const response = await fetch(`${API_URL}/query/categories`);
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch categories");
     }
+
+    return (await response.json()) as string[];
   },
   {
+    /*
+     * Prevent duplicate category API calls.
+     * Don't make another request if:
+     * 1. Categories are currently being fetched
+     * 2. Categories have already been successfully loaded
+     */
     condition: (_, { getState }) => {
-      const { standards } = getState();
-      if (standards.categories && standards.categories.length > 0) {
+      const state = getState();
+
+      if (state.standards.categoriesLoading) {
         return false;
       }
+
+      if (state.standards.categoriesLoaded) {
+        return false;
+      }
+
       return true;
     },
   }
 );
 
-// 2. Fetch Old Standards: GET /api/query/old-standards
-export const fetchOldStandards = createAsyncThunk<
-  Standard[],
-  void,
-  { state: { standards: StandardsState } }
->(
-  "standards/fetchOldStandards",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await fetch(`${API_URL}/query/old-standards`);
-      if (!response.ok) {
-        throw new Error(`Old standards fetch failed: ${response.status}`);
-      }
-      return (await response.json()) as Standard[];
-    } catch (err: any) {
-      return rejectWithValue(err.message || "Failed to fetch old standards");
-    }
-  },
-  {
-    condition: (_, { getState }) => {
-      const { standards } = getState();
-      if (standards.oldStandards && standards.oldStandards.length > 0) {
-        return false;
-      }
-      return true;
-    },
-  }
-);
+// ======================================================
+// FETCH STANDARDS
+// ======================================================
 
-// 3. Fetch Standard Standards: GET /api/query/standards
 export const fetchStandards = createAsyncThunk<
   Standard[],
   void,
-  { state: { standards: StandardsState } }
+  {
+    state: {
+      standards: StandardsState;
+    };
+  }
 >(
   "standards/fetchStandards",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await fetch(`${API_URL}/query/standards`);
-      if (!response.ok) {
-        throw new Error(`Standards fetch failed: ${response.status}`);
-      }
-      return (await response.json()) as Standard[];
-    } catch (err: any) {
-      return rejectWithValue(err.message || "Failed to fetch standards");
+  async () => {
+    const response = await fetch(`${API_URL}/query/standards`);
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch standards");
     }
+
+    return (await response.json()) as Standard[];
   },
   {
     condition: (_, { getState }) => {
@@ -119,6 +127,56 @@ export const fetchStandards = createAsyncThunk<
     },
   }
 );
+
+// ======================================================
+// FETCH OLD STANDARDS
+// ======================================================
+
+export const fetchOldStandards = createAsyncThunk<
+  Standard[],
+  void,
+  {
+    state: {
+      standards: StandardsState;
+    };
+  }
+>(
+  "standards/fetchOldStandards",
+  async () => {
+    const response = await fetch(`${API_URL}/query/old-standards`);
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch old standards");
+    }
+
+    return (await response.json()) as Standard[];
+  },
+  {
+    /*
+     * Prevent duplicate old-standards API calls.
+     * Don't make another request if:
+     * 1. Old standards are currently being fetched
+     * 2. Old standards have already been successfully loaded
+     */
+    condition: (_, { getState }) => {
+      const state = getState();
+
+      if (state.standards.oldStandardsLoading) {
+        return false;
+      }
+
+      if (state.standards.oldStandardsLoaded) {
+        return false;
+      }
+
+      return true;
+    },
+  }
+);
+
+// ======================================================
+// SLICE
+// ======================================================
 
 const standardsSlice = createSlice({
   name: "standards",
@@ -133,52 +191,67 @@ const standardsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Categories
+      // ==========================================
+      // CATEGORIES
+      // ==========================================
       .addCase(fetchCategories.pending, (state) => {
-        state.loadingCategories = true;
-        state.errorCategories = null;
+        state.categoriesLoading = true;
+        state.categoriesError = null;
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
-        state.loadingCategories = false;
+        state.categoriesLoading = false;
+        state.categoriesLoaded = true;
+        state.categoriesError = null;
         state.categories = action.payload;
       })
       .addCase(fetchCategories.rejected, (state, action) => {
-        state.loadingCategories = false;
-        state.errorCategories =
-          (action.payload as string) || action.error.message || "Failed to load categories";
+        state.categoriesLoading = false;
+        state.categoriesLoaded = false;
+        state.categoriesError =
+          action.error.message || "Failed to fetch categories";
       })
 
-      // Old Standards
-      .addCase(fetchOldStandards.pending, (state) => {
-        state.loadingOldStandards = true;
-        state.errorOldStandards = null;
-      })
-      .addCase(fetchOldStandards.fulfilled, (state, action) => {
-        state.loadingOldStandards = false;
-        state.oldStandards = action.payload;
-      })
-      .addCase(fetchOldStandards.rejected, (state, action) => {
-        state.loadingOldStandards = false;
-        state.errorOldStandards =
-          (action.payload as string) || action.error.message || "Failed to load old standards";
-      })
-
-      // Standards
+      // ==========================================
+      // STANDARDS
+      // ==========================================
       .addCase(fetchStandards.pending, (state) => {
-        state.loadingStandards = true;
-        state.errorStandards = null;
+        state.loading = true;
+        state.error = null;
       })
       .addCase(fetchStandards.fulfilled, (state, action) => {
-        state.loadingStandards = false;
+        state.loading = false;
+        state.error = null;
         state.standards = action.payload;
       })
       .addCase(fetchStandards.rejected, (state, action) => {
-        state.loadingStandards = false;
-        state.errorStandards =
-          (action.payload as string) || action.error.message || "Failed to load standards";
+        state.loading = false;
+        state.error =
+          action.error.message || "Failed to fetch standards";
+      })
+
+      // ==========================================
+      // OLD STANDARDS
+      // ==========================================
+      .addCase(fetchOldStandards.pending, (state) => {
+        state.oldStandardsLoading = true;
+        state.oldStandardsError = null;
+      })
+      .addCase(fetchOldStandards.fulfilled, (state, action) => {
+        state.oldStandardsLoading = false;
+        state.oldStandardsLoaded = true;
+        state.oldStandardsError = null;
+        state.oldStandards = action.payload;
+      })
+      .addCase(fetchOldStandards.rejected, (state, action) => {
+        state.oldStandardsLoading = false;
+        state.oldStandardsLoaded = false;
+        state.oldStandardsError =
+          action.error.message || "Failed to fetch old standards";
       });
   },
 });
 
-export const { setSelectedCategory, setSearchQuery } = standardsSlice.actions;
+export const { setSelectedCategory, setSearchQuery } =
+  standardsSlice.actions;
+
 export default standardsSlice.reducer;
