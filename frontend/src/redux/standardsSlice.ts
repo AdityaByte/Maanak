@@ -20,6 +20,12 @@ interface StandardsState {
   categoriesLoading: boolean;
   categoriesLoaded: boolean;
   categoriesError: string | null;
+
+  // Old Standards-specific state
+  oldStandards: Standard[];
+  oldStandardsLoading: boolean;
+  oldStandardsLoaded: boolean;
+  oldStandardsError: string | null;
 }
 
 const initialState: StandardsState = {
@@ -34,6 +40,11 @@ const initialState: StandardsState = {
   categoriesLoading: false,
   categoriesLoaded: false,
   categoriesError: null,
+
+  oldStandards: [],
+  oldStandardsLoading: false,
+  oldStandardsLoaded: false,
+  oldStandardsError: null,
 };
 
 // ======================================================
@@ -104,6 +115,55 @@ export const fetchStandards = createAsyncThunk<
     }
 
     return (await response.json()) as Standard[];
+  }
+);
+
+// ======================================================
+// FETCH OLD STANDARDS
+// ======================================================
+
+export const fetchOldStandards = createAsyncThunk<
+  Standard[],
+  void,
+  {
+    state: {
+      standards: StandardsState;
+    };
+  }
+>(
+  "standards/fetchOldStandards",
+  async () => {
+    const response = await fetch(
+      `${API_URL}/query/old-standards`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch old standards");
+    }
+
+    return (await response.json()) as Standard[];
+  },
+  {
+    /*
+     * Prevent duplicate old-standards API calls.
+     *
+     * Don't make another request if:
+     * 1. Old standards are currently being fetched
+     * 2. Old standards have already been successfully loaded
+     */
+    condition: (_, { getState }) => {
+      const state = getState();
+
+      if (state.standards.oldStandardsLoading) {
+        return false;
+      }
+
+      if (state.standards.oldStandardsLoaded) {
+        return false;
+      }
+
+      return true;
+    },
   }
 );
 
@@ -189,6 +249,35 @@ const standardsSlice = createSlice({
         state.error =
           action.error.message ||
           "Failed to fetch standards";
+      })
+
+      // ==========================================
+      // OLD STANDARDS
+      // ==========================================
+
+      // Old Standards - Loading
+      .addCase(fetchOldStandards.pending, (state) => {
+        state.oldStandardsLoading = true;
+        state.oldStandardsError = null;
+      })
+
+      // Old Standards - Success
+      .addCase(fetchOldStandards.fulfilled, (state, action) => {
+        state.oldStandardsLoading = false;
+        state.oldStandardsLoaded = true;
+        state.oldStandardsError = null;
+
+        state.oldStandards = action.payload;
+      })
+
+      // Old Standards - Error
+      .addCase(fetchOldStandards.rejected, (state, action) => {
+        state.oldStandardsLoading = false;
+        state.oldStandardsLoaded = false;
+
+        state.oldStandardsError =
+          action.error.message ||
+          "Failed to fetch old standards";
       });
   },
 });

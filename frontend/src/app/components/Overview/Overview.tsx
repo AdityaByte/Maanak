@@ -9,7 +9,10 @@ import { ArrowRight, Inbox, AlertCircle } from "lucide-react";
 
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "@/redux/store";
-import { fetchCategories } from "@/redux/standardsSlice";
+import {
+  fetchCategories,
+  fetchOldStandards,
+} from "@/redux/standardsSlice";
 
 type Standard = {
   standard_number: string;
@@ -35,19 +38,25 @@ export default function Overview() {
   const [error, setError] = useState<string | null>(null);
 
   // --------------------------------------------------
-  // Redux - Categories
+  // Redux
   // --------------------------------------------------
 
   const dispatch = useDispatch<AppDispatch>();
 
   const {
     categories,
-    loading: categoriesLoading,
-    error: categoriesError,
-  } = useSelector((state: RootState) => state.standards);
+    categoriesLoading,
+    categoriesError,
+
+    oldStandards,
+    oldStandardsLoading,
+    oldStandardsError,
+  } = useSelector(
+    (state: RootState) => state.standards
+  );
 
   // --------------------------------------------------
-  // Load Latest Search Results
+  // Load Recent Search Results
   // --------------------------------------------------
 
   const loadLatestSearchResults = () => {
@@ -56,7 +65,8 @@ export default function Overview() {
       setError(null);
 
       // Get stored search history
-      const storedSearches = localStorage.getItem("searchResults");
+      const storedSearches =
+        localStorage.getItem("searchResults");
 
       // No searches have been stored yet
       if (!storedSearches) {
@@ -77,7 +87,6 @@ export default function Overview() {
       }
 
       // --------------------------------------------------
-      // IMPORTANT:
       // searchHistory is stored newest-first.
       //
       // index 0 = latest search
@@ -85,42 +94,54 @@ export default function Overview() {
       // index 2 = older search
       // --------------------------------------------------
 
-      const latestSearch = searchHistory[0];
-
-      // Get citations from ONLY the latest search
-      const citations = latestSearch?.response?.citations;
-
-      // Latest search does not contain citations
-      if (!Array.isArray(citations)) {
-        setSearchResults([]);
-        return;
-      }
+      const recentStandards: Standard[] = [];
 
       // --------------------------------------------------
-      // Take maximum 5 standards from latest search
+      // Collect results from recent searches until
+      // we have 5 standards.
       // --------------------------------------------------
 
-      const latestStandards: Standard[] = citations
-        .filter(
-          (citation) =>
+      for (const search of searchHistory) {
+        const citations = search?.response?.citations;
+
+        // Skip searches without citations
+        if (!Array.isArray(citations)) {
+          continue;
+        }
+
+        for (const citation of citations) {
+          if (
             citation &&
             typeof citation.standard_number === "string" &&
             citation.standard_number.trim() !== ""
-        )
-        .slice(0, 5)
-        .map((citation) => ({
-          standard_number: citation.standard_number,
-          relevance: citation.relevance || "",
-        }));
+          ) {
+            recentStandards.push({
+              standard_number: citation.standard_number,
+              relevance: citation.relevance || "",
+            });
+          }
 
-      setSearchResults(latestStandards);
+          // Stop once we have 5 results
+          if (recentStandards.length === 5) {
+            break;
+          }
+        }
+
+        // Stop checking older searches
+        // once we have 5 results.
+        if (recentStandards.length === 5) {
+          break;
+        }
+      }
+
+      setSearchResults(recentStandards);
     } catch (err) {
       console.error(
-        "Failed to load latest search results:",
+        "Failed to load recent search results:",
         err
       );
 
-      setError("Unable to load latest search results.");
+      setError("Unable to load recent search results.");
     } finally {
       setIsLoading(false);
     }
@@ -135,11 +156,17 @@ export default function Overview() {
   }, []);
 
   // --------------------------------------------------
-  // Fetch Categories on Dashboard/Overview Mount
+  // Fetch Dashboard Data on Mount
   // --------------------------------------------------
 
   useEffect(() => {
+    // Fetch categories and old standards when
+    // the Dashboard is loaded.
+    //
+    // Redux prevents duplicate API calls if the
+    // data has already been loaded.
     dispatch(fetchCategories());
+    dispatch(fetchOldStandards());
   }, [dispatch]);
 
   // --------------------------------------------------
@@ -206,7 +233,7 @@ export default function Overview() {
               </h2>
 
               <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
-                Your most recently searched standards
+                Your 5 most recently searched standards
               </p>
             </div>
 
@@ -248,7 +275,7 @@ export default function Overview() {
               <p className="flex items-center justify-center gap-2 pt-2 text-xs text-muted-foreground font-medium">
                 <span className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
 
-                Loading latest search results...
+                Loading recent search results...
               </p>
 
             </div>
@@ -378,7 +405,191 @@ export default function Overview() {
       {activeTab === "Old Standards" && (
         <div className="mt-6">
 
-          {/* Implementation will be done later. */}
+          {/* Heading */}
+
+          <div className="mb-5">
+
+            <h2 className="text-base font-bold tracking-tight text-foreground">
+              Old Standards
+            </h2>
+
+            <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
+              Standards from the 1990s and 2000s
+            </p>
+
+          </div>
+
+          {/* ==================================================
+              LOADING
+          ================================================== */}
+
+          {oldStandardsLoading && (
+            <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-xs space-y-3">
+
+              {[...Array(5)].map((_, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-4 py-3 border-b border-border/40 last:border-0"
+                >
+                  <Skeleton className="h-5 w-28 rounded-md" />
+
+                  <Skeleton className="h-5 flex-1 rounded-md" />
+
+                  <Skeleton className="h-5 w-28 rounded-md" />
+                </div>
+              ))}
+
+            </div>
+          )}
+
+          {/* ==================================================
+              ERROR
+          ================================================== */}
+
+          {!oldStandardsLoading &&
+            oldStandardsError && (
+              <div className="flex items-center justify-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-8 text-center shadow-xs">
+
+                <AlertCircle className="h-5 w-5 text-rose-600 dark:text-rose-400" />
+
+                <p className="text-sm font-medium text-rose-700 dark:text-rose-300">
+                  {oldStandardsError}
+                </p>
+
+              </div>
+            )}
+
+          {/* ==================================================
+              EMPTY STATE
+          ================================================== */}
+
+          {!oldStandardsLoading &&
+            !oldStandardsError &&
+            oldStandards.length === 0 && (
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-10 text-center shadow-xs">
+
+                <Inbox className="mb-2 h-8 w-8 text-muted-foreground/60" />
+
+                <p className="text-sm text-muted-foreground">
+                  No old standards found.
+                </p>
+
+              </div>
+            )}
+
+          {/* ==================================================
+              OLD STANDARDS TABLE
+              
+              Dashboard shows ONLY 12 standards.
+
+              Redux still contains the complete list,
+              so the detailed Old Standards page can
+              reuse all standards without another API call.
+
+              Displayed:
+              - id
+              - title
+              - category
+              - sub_category
+              - year_published
+
+              Not displayed:
+              - content
+              - last_amended
+              - certification_type
+              - certificate_mandatory
+          ================================================== */}
+
+          {!oldStandardsLoading &&
+            !oldStandardsError &&
+            oldStandards.length > 0 && (
+              <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
+
+                <div className="overflow-x-auto">
+
+                  <table className="w-full min-w-[800px] border-collapse text-left">
+
+                    {/* Table Header */}
+
+                    <thead>
+                      <tr className="border-b border-border bg-muted/40">
+
+                        <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          ID
+                        </th>
+
+                        <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Title
+                        </th>
+
+                        <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Category
+                        </th>
+
+                        <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Sub-Category
+                        </th>
+
+                        <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Year Published
+                        </th>
+
+                      </tr>
+                    </thead>
+
+                    {/* Table Body */}
+
+                    <tbody className="divide-y divide-border/60">
+
+                      {oldStandards
+                        .slice(0, 12)
+                        .map((standard) => (
+                          <tr
+                            key={standard.id}
+                            className="group transition-colors hover:bg-muted/40"
+                          >
+
+                            {/* ID */}
+
+                            <td className="px-5 py-3.5 text-sm font-semibold text-foreground font-mono">
+                              {standard.id}
+                            </td>
+
+                            {/* Title */}
+
+                            <td className="px-5 py-3.5 text-sm font-medium text-foreground">
+                              {standard.title}
+                            </td>
+
+                            {/* Category */}
+
+                            <td className="px-5 py-3.5 text-sm text-muted-foreground">
+                              {standard.category}
+                            </td>
+
+                            {/* Sub-Category */}
+
+                            <td className="px-5 py-3.5 text-sm text-muted-foreground">
+                              {standard.sub_category || "—"}
+                            </td>
+
+                            {/* Year Published */}
+
+                            <td className="px-5 py-3.5 text-sm text-muted-foreground">
+                              {standard.year_published || "—"}
+                            </td>
+
+                          </tr>
+                        ))}
+
+                    </tbody>
+
+                  </table>
+
+                </div>
+
+              </div>
+            )}
 
         </div>
       )}
