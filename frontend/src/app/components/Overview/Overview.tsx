@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import SavedCategories, {
   Category,
-} from "../SavedCategories/SavedCategories";
+} from "../AvailableCategories/AvailableCategories";
 import Skeleton from "../ui/Skeleton";
 import { ArrowRight, Inbox, AlertCircle } from "lucide-react";
 
@@ -62,7 +62,7 @@ async function fetchLatestSearchResults(): Promise<Standard[]> {
 /*
  * Temporary category data.
  *
- * For now, these categories are hardcoded so the Saved Categories
+ * For now, these categories are hardcoded so the Available Categories
  * UI can be developed independently of the backend.
  *
  * Later, this will be replaced with the categories returned by
@@ -87,7 +87,7 @@ const mockCategories: Category[] = [
   },
 ];
 
-const TABS = ["Overview", "Old Standards", "Saved Categories"] as const;
+const TABS = ["Overview", "Old Standards", "Available Categories"] as const;
 
 const STATUS_STYLES: Record<Standard["status"], string> = {
   Active:
@@ -190,7 +190,10 @@ export default function Overview() {
             <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-xs space-y-3">
               <div className="space-y-2">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-4 py-2 border-b border-border/40 last:border-0">
+                  <div
+                    key={i}
+                    className="flex items-center gap-4 py-2 border-b border-border/40 last:border-0"
+                  >
                     <Skeleton className="h-5 w-28 rounded-md" />
                     <Skeleton className="h-5 flex-1 rounded-md" />
                     <Skeleton className="h-5 w-28 rounded-md hidden md:block" />
@@ -313,12 +316,12 @@ export default function Overview() {
         </div>
       )}
 
-      {/* Saved Categories */}
-      {activeTab === "Saved Categories" && (
+      {/* Available Categories */}
+      {activeTab === "Available Categories" && (
         <div className="mt-6">
           <div className="mb-5">
             <h2 className="text-base font-bold tracking-tight text-foreground">
-              Saved Categories
+              Available Categories
             </h2>
 
             <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
