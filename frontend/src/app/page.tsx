@@ -5,7 +5,7 @@ import Footer from "./components/Footer";
 
 export default function DashboardPage() {
   return (
-    <div className="w-full space-y-10 mx-auto mt-5">
+    <div className="w-full space-y-10">
       <HeroSection />
       <Overview />
       <Footer />
