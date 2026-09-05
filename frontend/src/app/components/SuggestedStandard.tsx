@@ -8,6 +8,7 @@ import {
   ExternalLink,
   Sparkles,
   Info,
+  CheckCircle2,
 } from "lucide-react";
 import Skeleton from "./ui/Skeleton";
 
@@ -53,10 +54,10 @@ export default function SuggestedStandard({
 }: SuggestedStandardProps) {
   if (loading) {
     return (
-      <div className="w-full max-w-3xl rounded-2xl border border-border bg-card p-6 md:p-8 shadow-xs text-left my-6 space-y-5">
+      <div className="w-full max-w-3xl rounded-3xl border border-border/80 bg-card/60 dark:bg-card/40 backdrop-blur-xl p-6 md:p-8 shadow-lg text-left my-4 space-y-5">
         <div className="flex items-center justify-between border-b border-border/60 pb-4">
           <div className="flex items-center gap-3">
-            <Skeleton className="h-10 w-10 rounded-xl" />
+            <Skeleton className="h-10 w-10 rounded-2xl" />
             <div className="space-y-1.5">
               <Skeleton className="h-4 w-44 rounded-md" />
               <Skeleton className="h-3 w-32 rounded-md" />
@@ -74,7 +75,7 @@ export default function SuggestedStandard({
         <div className="pt-3 border-t border-border/60 flex items-center gap-2">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           <p className="text-xs text-muted-foreground font-medium">
-            Retrieving standard specifications from vector index...
+            Retrieving verified standard specifications from neural index...
           </p>
         </div>
       </div>
@@ -87,27 +88,30 @@ export default function SuggestedStandard({
     confidenceStyles[data.confidence.toLowerCase()] || confidenceStyles.high;
 
   return (
-    <div className="w-full max-w-3xl rounded-2xl border border-border bg-card text-card-foreground p-6 md:p-8 shadow-sm text-left my-6 transition-all duration-200">
+    <div className="w-full max-w-3xl rounded-3xl border border-primary/30 bg-card/80 dark:bg-card/60 backdrop-blur-2xl text-card-foreground p-6 md:p-8 shadow-xl text-left my-4 transition-all duration-300 relative overflow-hidden">
+      {/* Ambient background glow */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/70 pb-4 mb-5">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/70 pb-4 mb-5 relative z-10">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary shadow-2xs">
-            <ShieldCheck className="h-5 w-5" />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 border border-primary/25 text-primary shadow-xs">
+            <ShieldCheck className="h-6 w-6" />
           </div>
           <div>
             <h3 className="text-sm font-bold tracking-wide uppercase text-foreground">
-              Suggested BIS Standard
+              Recommended BIS Specification
             </h3>
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
               <Sparkles className="h-3.5 w-3.5 text-primary" />
-              <span>AI-powered semantic match</span>
+              <span>Neural AI verified compliance match</span>
             </span>
           </div>
         </div>
 
         {/* Confidence Badge */}
         <div
-          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border capitalize ${currentConfidence.badge}`}
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border capitalize shadow-2xs ${currentConfidence.badge}`}
         >
           <span
             className={`h-1.5 w-1.5 rounded-full ${currentConfidence.dot} animate-pulse`}
@@ -117,15 +121,15 @@ export default function SuggestedStandard({
       </div>
 
       {/* Answer Content */}
-      <p className="text-sm sm:text-base text-foreground/90 leading-relaxed font-normal mb-6">
+      <p className="text-sm sm:text-base text-foreground/95 leading-relaxed font-normal mb-6 relative z-10">
         {data.answer}
       </p>
 
       {/* Citations / Matched Standards */}
       {data.citations && data.citations.length > 0 ? (
-        <div className="pt-4 border-t border-border/70 mb-2">
+        <div className="pt-4 border-t border-border/70 mb-2 relative z-10">
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-3">
-            Citations & Matched Standards
+            Authoritative Clauses &amp; IS Citations
           </span>
           <div className="flex flex-wrap gap-2">
             {data.citations.map((item, index) => {
@@ -137,7 +141,7 @@ export default function SuggestedStandard({
               const relevance =
                 typeof item === "object" && item.relevance
                   ? typeof item.relevance === "number"
-                    ? `${Math.round(item.relevance * 100)}%`
+                    ? `${Math.round(item.relevance * 100)}% Match`
                     : item.relevance
                   : null;
 
@@ -147,12 +151,12 @@ export default function SuggestedStandard({
                   href="https://standardsbis.bsbedge.com/"
                   target="_blank"
                   rel="noreferrer"
-                  className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/70 border border-border text-foreground text-xs font-medium hover:border-primary/50 hover:bg-primary/5 hover:text-primary transition-all duration-150 shadow-2xs"
+                  className="group inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-muted/60 dark:bg-muted/40 border border-border/80 text-foreground text-xs font-medium hover:border-primary/50 hover:bg-primary/10 hover:text-primary transition-all duration-150 shadow-2xs"
                 >
-                  <FileText className="h-3.5 w-3.5 text-primary group-hover:scale-105 transition-transform" />
-                  <span className="font-semibold">{standardNumber}</span>
+                  <FileText className="h-3.5 w-3.5 text-primary group-hover:scale-110 transition-transform" />
+                  <span className="font-bold">{standardNumber}</span>
                   {relevance && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-semibold">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-primary/15 text-primary font-semibold">
                       {relevance}
                     </span>
                   )}
@@ -163,7 +167,7 @@ export default function SuggestedStandard({
           </div>
         </div>
       ) : (
-        <div className="pt-3 pb-1 border-t border-border/70 flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="pt-3 pb-1 border-t border-border/70 flex items-center gap-2 text-xs text-muted-foreground relative z-10">
           <Info className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
           <span>
             No specific standard citations matched in the current indexed scope.
@@ -173,7 +177,7 @@ export default function SuggestedStandard({
 
       {/* Limitations */}
       {data.limitations && (
-        <div className="mt-4 pt-3 border-t border-border/70 flex items-start gap-2.5 text-xs text-muted-foreground leading-normal">
+        <div className="mt-4 pt-3 border-t border-border/70 flex items-start gap-2.5 text-xs text-muted-foreground leading-normal relative z-10">
           <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
           <span className="italic">{data.limitations}</span>
         </div>

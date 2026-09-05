@@ -5,5 +5,5 @@ export default function SubRouteLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="w-full">{children}</div>;
+  return <div className="w-full mx-auto mt-5">{children}</div>;
 }

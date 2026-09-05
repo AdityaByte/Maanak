@@ -16,27 +16,61 @@ export default function TopNavbar({
 }) {
   const [isDark, setIsDark] = useState(false);
 
-  // Load saved theme
+  // Load saved theme and listen to theme changes
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
+    const applyTheme = () => {
+      const savedTheme = localStorage.getItem("theme");
+      const isDarkMode =
+        savedTheme === "dark" ||
+        (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches) ||
+        (savedTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
-    if (savedTheme === "dark") {
-      document.documentElement.classList.add("dark");
-      setIsDark(true);
-    } else {
-      document.documentElement.classList.remove("dark");
-      setIsDark(false);
-    }
+      if (isDarkMode) {
+        document.documentElement.classList.add("dark");
+        setIsDark(true);
+      } else {
+        document.documentElement.classList.remove("dark");
+        setIsDark(false);
+      }
+    };
+
+    applyTheme();
+
+    const handleThemeChange = (e: any) => {
+      const theme = e?.detail?.theme || localStorage.getItem("theme");
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+        setIsDark(true);
+      } else if (theme === "light") {
+        document.documentElement.classList.remove("dark");
+        setIsDark(false);
+      } else {
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.classList.toggle("dark", prefersDark);
+        setIsDark(prefersDark);
+      }
+    };
+
+    window.addEventListener("maanak-theme-change", handleThemeChange);
+    window.addEventListener("storage", applyTheme);
+
+    return () => {
+      window.removeEventListener("maanak-theme-change", handleThemeChange);
+      window.removeEventListener("storage", applyTheme);
+    };
   }, []);
 
   // Toggle theme
   const toggleTheme = () => {
     const newTheme = isDark ? "light" : "dark";
-
     setIsDark(!isDark);
     localStorage.setItem("theme", newTheme);
-
     document.documentElement.classList.toggle("dark", newTheme === "dark");
+
+    // Dispatch global theme event so Settings and other views update immediately
+    window.dispatchEvent(
+      new CustomEvent("maanak-theme-change", { detail: { theme: newTheme } })
+    );
   };
 
   return (

@@ -39,6 +39,13 @@ export default function AIPage() {
           setMessages(parsed);
         }
       }
+      if (typeof window !== "undefined") {
+        const urlParams = new URLSearchParams(window.location.search);
+        const promptParam = urlParams.get("prompt");
+        if (promptParam) {
+          setInputValue(promptParam);
+        }
+      }
     } catch {
       // Ignore storage errors
     }

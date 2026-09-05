@@ -7,6 +7,7 @@ import Sidebar from "./components/Sidebar";
 import Drawer from "./components/Drawer";
 import TopNavbar from "./components/TopNavbar";
 import ReduxProvider from "./components/ReduxProvider";
+import ThemeInit from "./components/ThemeInit";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -33,9 +34,10 @@ export default function RootLayout({
       <body
         className={`${plusJakartaSans.className} flex h-screen overflow-hidden bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary`}
       >
+        <ThemeInit />
         <ReduxProvider>
           {/* Fixed Desktop Sidebar */}
-          <aside className="hidden h-full w-[260px] shrink-0 border-r border-slate-200/60 bg-white md:flex">
+          <aside className="hidden h-full w-[260px] shrink-0 border-r border-border bg-card md:flex">
             <Sidebar />
           </aside>
 
