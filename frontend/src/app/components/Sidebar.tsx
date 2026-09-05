@@ -30,7 +30,7 @@ const mainNavItems: NavItem[] = [
   { label: "Standards Search", href: "/standard-search", icon: Search, enabled: true },
   { label: "All Categories", href: "/all-categories", icon: Grid2X2, enabled: true },
   { label: "AI Assistant", href: "/ai", icon: BotMessageSquare, enabled: true },
-  { label: "Standards Explorer", href: "/standards-explorer", icon: Compass, enabled: true },
+  // { label: "Standards Explorer", href: "/standards-explorer", icon: Compass, enabled: true }, // Skipping this one as of we don't need it right now.
   { label: "Old Standards", href: "/old-standards", icon: History, enabled: true },
   // { label: "Saved Standards", href: "/saved-standards", icon: Bookmark, enabled: true },
   // { label: "Recent Activity", href: "/recent-activity", icon: Activity, enabled: true },

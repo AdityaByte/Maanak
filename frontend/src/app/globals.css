@@ -91,3 +91,68 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Custom Accent Colors */
+:root[data-theme-color="emerald"],
+[data-theme-color="emerald"] {
+  --primary: #059669;
+  --ring: #059669;
+}
+.dark[data-theme-color="emerald"],
+.dark [data-theme-color="emerald"] {
+  --primary: #10b981;
+  --ring: #10b981;
+}
+
+:root[data-theme-color="indigo"],
+[data-theme-color="indigo"] {
+  --primary: #6366f1;
+  --ring: #6366f1;
+}
+.dark[data-theme-color="indigo"],
+.dark [data-theme-color="indigo"] {
+  --primary: #818cf8;
+  --ring: #818cf8;
+}
+
+:root[data-theme-color="amber"],
+[data-theme-color="amber"] {
+  --primary: #d97706;
+  --ring: #d97706;
+}
+.dark[data-theme-color="amber"],
+.dark [data-theme-color="amber"] {
+  --primary: #f59e0b;
+  --ring: #f59e0b;
+}
+
+:root[data-theme-color="rose"],
+[data-theme-color="rose"] {
+  --primary: #e11d48;
+  --ring: #e11d48;
+}
+.dark[data-theme-color="rose"],
+.dark [data-theme-color="rose"] {
+  --primary: #f43f5e;
+  --ring: #f43f5e;
+}
+
+/* Font Size Scaling */
+:root[data-font-size="compact"] {
+  font-size: 14px;
+}
+:root[data-font-size="comfortable"] {
+  font-size: 16px;
+}
+:root[data-font-size="spacious"] {
+  font-size: 17.5px;
+}
+
+/* Reduced Motion */
+:root[data-reduced-motion="true"] *,
+:root[data-reduced-motion="true"] *::before,
+:root[data-reduced-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
