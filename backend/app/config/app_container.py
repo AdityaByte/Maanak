@@ -7,6 +7,7 @@ from app.core.prompt_builder import PromptBuilder
 from app.core.llm.groq_llm_client import GroqLLMClient
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance
+from app.service.chat.chat_service import ChatSessionStore
 import os
 import logging
 
@@ -25,6 +26,7 @@ class AppContainer:
         self.prompt_builder: PromptBuilder | None = None
         self.llm_client: GroqLLMClient | None = None
         self.collection_name: str | None = None
+        self.chat_session_store: ChatSessionStore | None = None
 
     def initialize(self):
         self.embedding_manager = EmbeddingManager()
@@ -63,6 +65,13 @@ class AppContainer:
         self.context_builder = ContextBuilder()
         self.prompt_builder = PromptBuilder()
         self.llm_client = GroqLLMClient()
+
+        self.chat_session_store = ChatSessionStore(
+            retriever=self.retriever,
+            context_builder=self.context_builder,
+            prompt_builder=self.prompt_builder,
+            llm_client=self.llm_client
+        )
 
 
     def _create_collection(self, collection_name: str, dense_dim: int) -> None:

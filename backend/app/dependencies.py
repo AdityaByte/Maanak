@@ -2,6 +2,7 @@ from fastapi import Request
 
 from app.service.query_service import QueryService
 from app.service.admin_service import AdminService
+from app.service.chat.chat_service import ChatService
 
 def get_query_service(request: Request) -> QueryService:
 
@@ -19,3 +20,8 @@ def get_query_service(request: Request) -> QueryService:
 def get_admin_service(request: Request) -> AdminService:
     container = request.app.state.container
     return AdminService(vector_store=container.qdrant_vector_store)
+
+def get_chat_service(request: Request) -> ChatService:
+    container = request.app.state.container
+    return ChatService(session_store=container.chat_session_store)
+ 
