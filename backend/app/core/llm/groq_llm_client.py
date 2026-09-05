@@ -7,6 +7,12 @@ from pydantic import BaseModel
 
 T = TypeVar("T", bound=BaseModel) # Using the TypeVar for making it more genric.
 
+_ROLE_MAP = {
+    "system": "system",
+    "user": "human",
+    "assistant": "ai",
+}
+
 @dataclass
 class GroqLLMClient(LLMClient):
     model: str = "openai/gpt-oss-120b"
@@ -38,6 +44,18 @@ class GroqLLMClient(LLMClient):
             ("system", prompt["system"]),
             ("human", prompt["message"]["content"])
         ]
+
+        response = self._llm.with_structured_output(schema).invoke(messages)
+        return response
+
+    def complete_chat(self, prompt: dict[str, any], schema: type[T]) -> T:
+        if not self._llm:
+            raise ValueError("ChatGroq object is not created.")
+
+        messages = [("system", prompt["system"])]
+        for turn in prompt["messages"]:
+            role = _ROLE_MAP.get(turn["role"], "human")
+            messages.append((role, turn["content"]))
 
         response = self._llm.with_structured_output(schema).invoke(messages)
         return response
