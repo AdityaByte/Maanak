@@ -8,65 +8,15 @@ import Skeleton from "../ui/Skeleton";
 import { ArrowRight, Inbox, AlertCircle } from "lucide-react";
 
 type Standard = {
-  standard: string;
-  title: string;
-  domain: string;
-  published: string;
-  status: "Active" | "Withdrawn" | "Superseded";
+  standard_number: string;
+  relevance: string;
 };
-
-const mockLatestSearchResults: Standard[] = [
-  {
-    standard: "IS 456 : 2000",
-    title: "Plain and Reinforced Concrete - Code of Practice",
-    domain: "Civil Engineering",
-    published: "Oct 2000",
-    status: "Active",
-  },
-  {
-    standard: "IS 800 : 2007",
-    title: "General Construction in Steel - Code of Practice",
-    domain: "Civil Engineering",
-    published: "Dec 2007",
-    status: "Active",
-  },
-  {
-    standard: "IS 1893 : Part 1 : 2016",
-    title: "Criteria for Earthquake Resistant Design of Structures",
-    domain: "Civil Engineering",
-    published: "Dec 2016",
-    status: "Withdrawn",
-  },
-  {
-    standard: "IS 13920 : 2016",
-    title: "Ductile Design and Detailing of Reinforced Concrete",
-    domain: "Civil Engineering",
-    published: "Nov 2016",
-    status: "Superseded",
-  },
-];
-
-/*
- * Temporary data source.
- *
- * For now, this returns mock data so the Overview can be developed
- * independently of the backend.
- *
- * Later, this function will fetch the latest search results from
- * the backend cache.
- */
-async function fetchLatestSearchResults(): Promise<Standard[]> {
-  return mockLatestSearchResults;
-}
 
 /*
  * Temporary category data.
  *
- * For now, these categories are hardcoded so the Saved Categories
- * UI can be developed independently of the backend.
- *
- * Later, this will be replaced with the categories returned by
- * the backend from the Vector DB.
+ * This will be replaced with Redux categories
+ * in the Saved Categories task.
  */
 const mockCategories: Category[] = [
   {
@@ -89,40 +39,90 @@ const mockCategories: Category[] = [
 
 const TABS = ["Overview", "Old Standards", "Saved Categories"] as const;
 
-const STATUS_STYLES: Record<Standard["status"], string> = {
-  Active:
-    "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20",
-  Withdrawn:
-    "bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20",
-  Superseded:
-    "bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20",
-};
-
-function StatusDot({ status }: { status: Standard["status"] }) {
-  const dotColor =
-    status === "Active"
-      ? "bg-emerald-500"
-      : status === "Withdrawn"
-        ? "bg-rose-500"
-        : "bg-amber-500";
-
-  return <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />;
-}
-
 export default function Overview() {
   const [activeTab, setActiveTab] =
     useState<(typeof TABS)[number]>("Overview");
+
   const [searchResults, setSearchResults] = useState<Standard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadLatestSearchResults = async () => {
+  const loadLatestSearchResults = () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const results = await fetchLatestSearchResults();
-      setSearchResults(results);
+      const storedSearches = localStorage.getItem("searchResults");
+
+      // No searches have been stored yet
+      if (!storedSearches) {
+        setSearchResults([]);
+        return;
+      }
+
+      const searchHistory = JSON.parse(storedSearches);
+
+      // Make sure stored data is an array
+      if (!Array.isArray(searchHistory)) {
+        setSearchResults([]);
+        return;
+      }
+
+      const standards: Standard[] = [];
+      const seenStandards = new Set<string>();
+
+      /*
+       * searchHistory is stored newest-first.
+       *
+       * Example:
+       *
+       * [
+       *   {
+       *     query: "pet food standards",
+       *     response: {
+       *       citations: [...]
+       *     },
+       *     searchedAt: "..."
+       *   }
+       * ]
+       *
+       * We extract standards from response.citations.
+       */
+      for (const search of searchHistory) {
+        const citations = search?.response?.citations;
+
+        if (!Array.isArray(citations)) {
+          continue;
+        }
+
+        for (const citation of citations) {
+          const standardNumber = citation?.standard_number;
+
+          if (
+            standardNumber &&
+            !seenStandards.has(standardNumber)
+          ) {
+            seenStandards.add(standardNumber);
+
+            standards.push({
+              standard_number: standardNumber,
+              relevance: citation.relevance || "",
+            });
+          }
+
+          // Dashboard only needs 5 standards
+          if (standards.length === 5) {
+            break;
+          }
+        }
+
+        // Stop once we have 5 standards
+        if (standards.length === 5) {
+          break;
+        }
+      }
+
+      setSearchResults(standards);
     } catch (err) {
       console.error("Failed to load latest search results:", err);
       setError("Unable to load latest search results.");
@@ -152,9 +152,12 @@ export default function Overview() {
               }`}
             >
               {tab}
+
               <span
                 className={`absolute inset-x-0 -bottom-px h-0.5 rounded-full transition-all duration-200 ${
-                  activeTab === tab ? "bg-primary" : "bg-transparent"
+                  activeTab === tab
+                    ? "bg-primary"
+                    : "bg-transparent"
                 }`}
               />
             </button>
@@ -171,6 +174,7 @@ export default function Overview() {
               <h2 className="text-base font-bold tracking-tight text-foreground">
                 Latest Search Results
               </h2>
+
               <p className="mt-0.5 text-xs sm:text-sm text-muted-foreground">
                 Your most recently searched standards
               </p>
@@ -189,18 +193,23 @@ export default function Overview() {
           {isLoading && (
             <div className="overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-xs space-y-3">
               <div className="space-y-2">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-4 py-2 border-b border-border/40 last:border-0">
+                {[...Array(5)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-4 py-2 border-b border-border/40 last:border-0"
+                  >
                     <Skeleton className="h-5 w-28 rounded-md" />
+
                     <Skeleton className="h-5 flex-1 rounded-md" />
-                    <Skeleton className="h-5 w-28 rounded-md hidden md:block" />
-                    <Skeleton className="h-5 w-20 rounded-md hidden sm:block" />
-                    <Skeleton className="h-6 w-20 rounded-full" />
+
+                    <Skeleton className="h-6 w-16 rounded-lg" />
                   </div>
                 ))}
               </div>
+
               <p className="flex items-center justify-center gap-2 pt-2 text-xs text-muted-foreground font-medium">
                 <span className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+
                 Loading latest search results...
               </p>
             </div>
@@ -210,6 +219,7 @@ export default function Overview() {
           {!isLoading && error && (
             <div className="flex items-center justify-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-8 text-center shadow-xs">
               <AlertCircle className="h-5 w-5 text-rose-600 dark:text-rose-400" />
+
               <p className="text-sm font-medium text-rose-700 dark:text-rose-300">
                 {error}
               </p>
@@ -217,99 +227,80 @@ export default function Overview() {
           )}
 
           {/* Empty state */}
-          {!isLoading && !error && searchResults.length === 0 && (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-10 text-center shadow-xs">
-              <Inbox className="h-8 w-8 text-muted-foreground/60 mb-2" />
-              <p className="text-sm text-muted-foreground">
-                No recent search results found.
-              </p>
-            </div>
-          )}
+          {!isLoading &&
+            !error &&
+            searchResults.length === 0 && (
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-10 text-center shadow-xs">
+                <Inbox className="h-8 w-8 text-muted-foreground/60 mb-2" />
+
+                <p className="text-sm text-muted-foreground">
+                  No recent search results found.
+                </p>
+              </div>
+            )}
 
           {/* Table */}
-          {!isLoading && !error && searchResults.length > 0 && (
-            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[760px] border-collapse text-left">
-                  <thead>
-                    <tr className="border-b border-border bg-muted/40 text-left">
-                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Standard
-                      </th>
-                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Title
-                      </th>
-                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Domain
-                      </th>
-                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Published
-                      </th>
-                      <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Status
-                      </th>
-                      <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
+          {!isLoading &&
+            !error &&
+            searchResults.length > 0 && (
+              <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[600px] border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-border bg-muted/40">
+                        <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Standard
+                        </th>
 
-                  <tbody className="divide-y divide-border/60">
-                    {searchResults.map((item) => (
-                      <tr
-                        key={item.standard}
-                        className="group transition-colors hover:bg-muted/40"
-                      >
-                        <td className="px-5 py-3.5 text-sm font-semibold text-foreground font-mono">
-                          {item.standard}
-                        </td>
+                        <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Relevance
+                        </th>
 
-                        <td className="px-5 py-3.5 text-sm text-foreground/90 font-medium">
-                          {item.title}
-                        </td>
-
-                        <td className="px-5 py-3.5 text-sm text-muted-foreground">
-                          {item.domain}
-                        </td>
-
-                        <td className="px-5 py-3.5 text-sm text-muted-foreground">
-                          {item.published}
-                        </td>
-
-                        <td className="px-5 py-3.5">
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              STATUS_STYLES[item.status]
-                            }`}
-                          >
-                            <StatusDot status={item.status} />
-                            {item.status}
-                          </span>
-                        </td>
-
-                        <td className="px-5 py-3.5 text-right text-sm">
-                          <button
-                            type="button"
-                            className="rounded-lg px-2.5 py-1 text-xs font-semibold text-primary transition-all duration-150 group-hover:bg-primary/10 hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                          >
-                            View
-                          </button>
-                        </td>
+                        <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Action
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+
+                    <tbody className="divide-y divide-border/60">
+                      {searchResults.map((item) => (
+                        <tr
+                          key={item.standard_number}
+                          className="group transition-colors hover:bg-muted/40"
+                        >
+                          {/* Standard Number */}
+                          <td className="px-5 py-3.5 text-sm font-semibold text-foreground font-mono">
+                            {item.standard_number}
+                          </td>
+
+                          {/* Relevance */}
+                          <td className="px-5 py-3.5 text-sm text-muted-foreground">
+                            {item.relevance}
+                          </td>
+
+                          {/* Action */}
+                          <td className="px-5 py-3.5 text-right text-sm">
+                            <button
+                              type="button"
+                              className="rounded-lg px-2.5 py-1 text-xs font-semibold text-primary transition-all duration-150 group-hover:bg-primary/10 hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       )}
 
       {/* Old Standards */}
       {activeTab === "Old Standards" && (
         <div className="mt-6">
-          {/* Intentionally left blank.
-              Implementation will be done later. */}
+          {/* Implementation will be done later. */}
         </div>
       )}
 
@@ -326,6 +317,7 @@ export default function Overview() {
             </p>
           </div>
 
+          {/* Temporary mock data - will be replaced with Redux */}
           <SavedCategories categories={mockCategories} />
         </div>
       )}
