@@ -34,7 +34,7 @@ class AppContainer:
 
         dense_dim = self.embedding_manager.get_embeddings_dimesion()
 
-        collection_name: str = os.getenv("QDRANT_COLLECTION_NAME")
+        collection_name: str = os.getenv("QDRANT_COLLECTION_NAME") or "bis_standards"
         if collection_name == "":
             logger.error(f"Failed to load the environment variable for collection name.")
             exit(1)

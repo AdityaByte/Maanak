@@ -46,7 +46,43 @@ export default function HeroSection() {
 
       const data: SuggestedStandardData = await res.json();
       console.log("Search response data:", data);
-      setResult(data);
+
+       // Store the search result in localStorage 
+       // Get previously stored searches
+    const storedSearches = localStorage.getItem("searchResults");
+
+    let searchHistory: {
+      query: string;
+      response: SuggestedStandardData;
+      searchedAt: string;
+    }[] = [];
+
+    try {
+      const parsed = storedSearches
+        ? JSON.parse(storedSearches)
+        : [];
+
+      if (Array.isArray(parsed)) {
+        searchHistory = parsed;
+      }
+    } catch (error) {
+      console.error("Failed to parse stored search results:", error);
+    }
+
+    // Add newest search at the beginning
+    searchHistory.unshift({
+      query: searchQuery.trim(),
+      response: data,
+      searchedAt: new Date().toISOString(),
+    });
+
+    // Save search history
+    localStorage.setItem(
+      "searchResults",
+      JSON.stringify(searchHistory)
+    );
+      
+       setResult(data);
     } catch (err: any) {
       console.error("Fetch error:", err);
       setError(err.message || "Error communicating with backend");
