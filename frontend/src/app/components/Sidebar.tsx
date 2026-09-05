@@ -10,10 +10,12 @@ import {
   BotMessageSquare,
   Compass,
   History,
+  Grid2X2, // Added for Categories
   Bookmark,
   Activity,
   Settings,
   HelpCircle,
+  Layers,
 } from "lucide-react";
 
 type NavItem = {
@@ -26,11 +28,12 @@ type NavItem = {
 const mainNavItems: NavItem[] = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard, enabled: true },
   { label: "Standards Search", href: "/standard-search", icon: Search, enabled: true },
+  { label: "All Categories", href: "/all-categories", icon: Grid2X2, enabled: true },
   { label: "AI Assistant", href: "/ai", icon: BotMessageSquare, enabled: true },
   { label: "Standards Explorer", href: "/standards-explorer", icon: Compass, enabled: true },
   { label: "Old Standards", href: "/old-standards", icon: History, enabled: true },
-  { label: "Saved Standards", href: "/saved-standards", icon: Bookmark, enabled: true },
-  { label: "Recent Activity", href: "/recent-activity", icon: Activity, enabled: true },
+  // { label: "Saved Standards", href: "/saved-standards", icon: Bookmark, enabled: true },
+  // { label: "Recent Activity", href: "/recent-activity", icon: Activity, enabled: true },
 ];
 
 function SearchIconWrapper(props: { className?: string }) {
