@@ -4,92 +4,71 @@ interface StandardCardProps {
   standard: Standard;
 }
 
-export default function StandardCard({
-  standard,
-}: StandardCardProps) {
+export default function StandardCard({ standard, className = "" }: any) {
   return (
-    <div className="rounded-xl border border-border bg-card p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      
-      {/* Standard ID */}
-      <p className="mb-3 text-sm font-medium text-primary">
-        {standard.id}
-      </p>
+    <div
+      className={`h-full flex flex-col justify-between bg-card border border-border rounded-2xl p-6 shadow-xs hover:border-border/80 transition-all ${className}`}
+    >
+      {/* Top Content: Code, Title, Content & Categories */}
+      <div className="space-y-3">
+        {/* Code ID */}
+        <p className="text-xs font-semibold text-primary tracking-wide">
+          {standard.id}
+        </p>
 
-      {/* Title */}
-      <h2 className="mb-3 text-xl font-semibold leading-7 text-foreground">
-        {standard.title}
-      </h2>
+        {/* Standard Title - line clamped so all titles take equal visual space */}
+        <h3
+          className="text-base font-bold text-foreground leading-snug line-clamp-2 min-h-[3rem]"
+          title={standard.title}
+        >
+          {standard.title}
+        </h3>
 
-      {/* Content */}
-      <p className="mb-4 line-clamp-3 text-sm leading-6 text-muted-foreground">
-        {standard.content}
-      </p>
+        {/* Content / Summary - clamped to 2 lines */}
+        <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2rem]">
+          {standard.content}
+        </p>
 
-      {/* Categories */}
-      <div className="mb-5 flex flex-wrap gap-2">
-        <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-          {standard.category}
-        </span>
-
-        {standard.sub_category && (
-          <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-            {standard.sub_category}
-          </span>
-        )}
+        {/* Category Pills */}
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {standard.category && (
+            <span className="inline-block px-2.5 py-1 text-[11px] font-medium rounded-lg bg-primary/10 text-primary">
+              {standard.category}
+            </span>
+          )}
+          {standard.sub_category && (
+            <span className="inline-block px-2.5 py-1 text-[11px] font-medium rounded-lg bg-muted text-muted-foreground">
+              {standard.sub_category}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Divider */}
-      <div className="mb-5 border-t border-border" />
-
-      {/* Metadata */}
-      <div className="grid grid-cols-2 gap-x-6 gap-y-5">
-        
-        {/* Published */}
+      {/* Bottom Metadata: Pushed to the bottom evenly via mt-auto */}
+      <div className="mt-6 pt-4 border-t border-border grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
         <div>
-          <p className="text-xs font-medium text-muted-foreground">
-            Published
-          </p>
-
-          <p className="mt-1 text-sm font-medium text-foreground">
-            {standard.year_published ?? "N/A"}
-          </p>
+          <span className="block text-[11px] text-muted-foreground">Published</span>
+          <span className="font-semibold text-foreground">
+            {standard.year_published || "N/A"}
+          </span>
         </div>
-
-        {/* Last Amended */}
         <div>
-          <p className="text-xs font-medium text-muted-foreground">
-            Last Amended
-          </p>
-
-          <p className="mt-1 text-sm font-medium text-foreground">
-            {standard.last_amended ?? "N/A"}
-          </p>
+          <span className="block text-[11px] text-muted-foreground">Last Amended</span>
+          <span className="font-semibold text-foreground">
+            {standard.last_amended || "N/A"}
+          </span>
         </div>
-
-        {/* Certification */}
         <div>
-          <p className="text-xs font-medium text-muted-foreground">
-            Certification
-          </p>
-
-          <p className="mt-1 text-sm font-medium text-foreground">
-            {standard.certification_type ?? "N/A"}
-          </p>
+          <span className="block text-[11px] text-muted-foreground">Certification</span>
+          <span className="font-semibold text-foreground truncate block" title={standard.certification_type}>
+            {standard.certification_type || "N/A"}
+          </span>
         </div>
-
-        {/* Mandatory */}
         <div>
-          <p className="text-xs font-medium text-muted-foreground">
-            Mandatory
-          </p>
-
-          <p className="mt-1 text-sm font-medium text-foreground">
-            {standard.certificate_mandatory === null
-              ? "N/A"
-              : standard.certificate_mandatory
-              ? "Yes"
-              : "No"}
-          </p>
+          <span className="block text-[11px] text-muted-foreground">Mandatory</span>
+          <span className="font-semibold text-foreground">
+            {standard.certificate_mandatory ? "Yes" : "No"}
+          </span>
         </div>
       </div>
     </div>
