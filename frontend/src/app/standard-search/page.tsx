@@ -46,12 +46,12 @@ export default function StandardSearchPage() {
     <div className="mx-auto max-w-7xl">
 
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-foreground">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">
           Standards Search
         </h1>
 
-        <p className="mt-2 text-muted-foreground">
+        <p className="mt-2 text-sm sm:text-base text-muted-foreground">
           Search and explore BIS standards.
         </p>
       </div>

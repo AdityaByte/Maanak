@@ -246,7 +246,7 @@ export default function TopNavbar({ userInitials = "JD" }: { userInitials?: stri
                     initial="hidden"
                     animate="visible"
                     exit="exit"
-                    className="absolute right-0 top-[calc(100%+10px)] w-[340px] rounded-2xl border border-border/70 bg-card/90 shadow-2xl backdrop-blur-2xl overflow-hidden"
+                    className="absolute right-0 top-[calc(100%+10px)] w-[340px] max-w-[calc(100vw-2rem)] rounded-2xl border border-border/70 bg-card/90 shadow-2xl backdrop-blur-2xl overflow-hidden z-50"
                     style={{ transformOrigin: "top right" }}
                   >
                     {/* Header */}
@@ -348,7 +348,7 @@ export default function TopNavbar({ userInitials = "JD" }: { userInitials?: stri
                     initial="hidden"
                     animate="visible"
                     exit="exit"
-                    className="absolute right-0 top-[calc(100%+10px)] w-[220px] rounded-2xl border border-border/70 bg-card/90 shadow-2xl backdrop-blur-2xl overflow-hidden"
+                    className="absolute right-0 top-[calc(100%+10px)] w-[220px] max-w-[calc(100vw-2rem)] rounded-2xl border border-border/70 bg-card/90 shadow-2xl backdrop-blur-2xl overflow-hidden z-50"
                     style={{ transformOrigin: "top right" }}
                   >
                     {/* User card */}

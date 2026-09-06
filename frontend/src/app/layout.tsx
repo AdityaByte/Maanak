@@ -32,29 +32,36 @@ export default function RootLayout({
       className={`h-full ${plusJakartaSans.variable}`}
     >
       <body
-        className={`${plusJakartaSans.className} flex h-screen overflow-hidden bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary`}
+        className={`${plusJakartaSans.className} h-screen overflow-hidden bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary`}
       >
         <ThemeInit />
         <ReduxProvider>
-          {/* Fixed Desktop Sidebar */}
-          <aside className="hidden h-full w-[260px] shrink-0 border-r border-border bg-card md:flex">
-            <Sidebar />
-          </aside>
+          {/* Mobile: flex-col (Drawer bar on top, main below). Desktop: flex-row (sidebar + main side-by-side) */}
+          <div className="flex flex-col md:flex-row h-full overflow-hidden">
 
-          {/* Mobile Drawer */}
-          <Drawer />
+            {/* Fixed Desktop Sidebar — hidden on mobile */}
+            <aside className="hidden h-full w-[260px] shrink-0 border-r border-border bg-card md:flex">
+              <Sidebar />
+            </aside>
 
-          {/* Main Content Viewport */}
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-            <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-              {/* Sticky Header */}
-              <TopNavbar />
+            {/* Mobile Drawer (sticky top bar + slide-in panel) */}
+            <Drawer />
 
-              {/* Scrollable Page Body */}
-              <div className="px-8 pb-12">
-                {children}
-              </div>
-            </main>
+            {/* Main Content Viewport */}
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+              <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+                {/* Sticky Top Navbar — desktop only (Drawer has its own top bar on mobile) */}
+                <div className="hidden md:block">
+                  <TopNavbar />
+                </div>
+
+                {/* Scrollable Page Body */}
+                <div className="px-4 sm:px-6 lg:px-8 pb-12">
+                  {children}
+                </div>
+              </main>
+            </div>
+
           </div>
         </ReduxProvider>
       </body>

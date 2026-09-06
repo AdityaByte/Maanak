@@ -166,7 +166,7 @@ export default function AIPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-8rem)] w-full max-w-5xl mx-auto">
+    <div className="flex flex-col min-h-[calc(100vh-3.5rem)] md:min-h-[calc(100vh-4.5rem)] w-full max-w-5xl mx-auto">
       {/* Top AI Header */}
       <ChatHeader
         sessionId={sessionId}

@@ -154,13 +154,13 @@ export default function Overview() {
       ================================================== */}
 
       <div className="border-b border-border/80">
-        <div className="flex gap-6 sm:gap-8">
+        <div className="flex gap-4 sm:gap-6 md:gap-8 overflow-x-auto scrollbar-hide">
           {TABS.map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className={`relative pb-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+              className={`relative shrink-0 pb-3 text-xs sm:text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
                 activeTab === tab
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"

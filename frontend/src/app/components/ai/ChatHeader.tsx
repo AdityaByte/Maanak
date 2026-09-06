@@ -50,13 +50,13 @@ export default function ChatHeader({
       {/* Session State & Action Buttons */}
       <div className="flex flex-wrap items-center gap-2">
         {/* Session Status Pill */}
-        <div className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-2xs">
+        <div className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-2xs max-w-[160px] sm:max-w-none overflow-hidden">
           <span
-            className={`h-2 w-2 rounded-full ${
+            className={`h-2 w-2 rounded-full shrink-0 ${
               sessionId ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
             }`}
           />
-          <span className="font-mono text-[11px]">
+          <span className="font-mono text-[11px] truncate">
             {sessionId ? `Session: ${sessionId.slice(0, 8)}...` : "New Session"}
           </span>
         </div>
