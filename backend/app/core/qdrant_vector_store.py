@@ -44,6 +44,7 @@ class QdrantVectorStore:
             logger.info(f"Dropping the existed collection {self.collection_name} and recreating it.")
             # Dropping the existing collection and creating a new one.
             self.client.delete_collection(self.collection_name)
+            exists = False
 
         if not exists:
 
@@ -94,7 +95,7 @@ class QdrantVectorStore:
                 # skipping expection.
                 pass
 
-    def add_documents(self, documents: list[dict[str, any]], batch_size:int = 64):
+    def add_documents(self, documents: list[dict[str, any]], batch_size:int = 24):
         """
         documents: list of dicts shaped like:
             {"page_content": "...", "metadata": {"id": "IS_8707", ...}}

@@ -25,20 +25,37 @@ class EmbeddingManager:
             raise
 
     def _resolve_dimension(self) -> int:
+        """Looks up the embedding dimension from fastembed's model registry
+        instead of running a throwaway encode to find out."""
         for info in TextEmbedding.list_supported_models():
             if info["model"] == self.model_name:
                 return info["dim"]
         raise ValueError(f"Could not resolve embedding dimension for {self.model_name}")
 
-    def generate_embeddings(self, texts: list[str]) -> np.ndarray:
-        """Generates embedding for the page_content."""
+    def generate_embeddings(self, texts: str | list[str]) -> np.ndarray:
+        """Generates embedding(s) for the given text(s).
+
+        Accepts a single string OR a list of strings, matching the original
+        sentence-transformers behavior:
+          - single string  -> returns a 1D array, shape (dim,)
+          - list of strings -> returns a 2D array, shape (n, dim)
+
+        This matters because fastembed's embed() expects an iterable of
+        strings — passing it a single string directly would silently
+        iterate over its individual characters instead of embedding the
+        whole string, producing a wrongly-shaped multi-vector output.
+        """
         if not self.model:
             raise ValueError(f"Model not loaded {self.model_name}")
 
-        logger.info(f"Generating embeddings for {len(texts)}")
-        embeddings = np.array(list(self.model.embed(texts)))
+        is_single = isinstance(texts, str)
+        text_list = [texts] if is_single else texts
+
+        logger.info(f"Generating embeddings for {len(text_list)}")
+        embeddings = np.array(list(self.model.embed(text_list)))
         logger.info(f"Embeddings generated successfully with shape: {embeddings.shape}")
-        return embeddings
+
+        return embeddings[0] if is_single else embeddings
 
     def get_embeddings_dimesion(self) -> int:
         "Returns embeddings dimesion."
