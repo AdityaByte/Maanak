@@ -13,6 +13,15 @@ Maanak is an intelligent Retrieval-Augmented Generation (RAG) platform designed 
 
 ---
 
+## User Interface
+
+![Snapshot1](https://drive.google.com/uc?export=view&id=1arESX7YLo4e6CLilgToMcTNGR8zFu2H_)
+![Snapshot2](https://drive.google.com/uc?export=view&id=16WC0JGPqNwhg2i6mUWuuABFHkDItiALS)
+![Snapshot3](https://drive.google.com/uc?export=view&id=1PFo_jZmzplBg0fzF4ZOj1GNXIxPMA7MC)
+
+
+---
+
 ## Overview & System Architecture
 
 Maanak operates across three primary decoupled pipelines: **Data Augmentation**, **Vector Retrieval**, and **Contextual Generation**.
@@ -172,11 +181,6 @@ Access points:
 
 * **Web Client**: `http://localhost:3000`
 * **API Documentation**: `http://localhost:8080/docs`
-
----
-
-## User Interface
-![Snapshot](https://drive.google.com/uc?export=view&id=15LfXcNeXwr7zi3pq3WTD3aKL0TQLv48j)
 
 ---
 
